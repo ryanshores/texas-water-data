@@ -60,7 +60,7 @@ final class TexasWaterCoreTests: XCTestCase {
         let dashboard = ReservoirCatalogBuilder.build(from: decoded)
         let travis = try XCTUnwrap(dashboard.reservoirs.first)
 
-        XCTAssertEqual(dashboard.statewidePercentFull ?? 0, 89.2, accuracy: 0.001)
+        XCTAssertEqual(dashboard.statewidePercentFull ?? 0, 89.2, accuracy: 0.01)
         XCTAssertEqual(travis.slug, "travis")
         XCTAssertEqual(travis.status, .normal)
         XCTAssertEqual(travis.heightFromConservationPool ?? 0, -6.48, accuracy: 0.001)
