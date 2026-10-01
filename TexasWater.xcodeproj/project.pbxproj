@@ -15,7 +15,7 @@
 
 /* Begin PBXFileReference section */
 		252335BE49976F8049BD4DC9 /* TexasWaterApp.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TexasWaterApp.swift; sourceTree = "<group>"; };
-		680401CB5FADA933AAFA5CCF /* TexasWater.app */ = {isa = PBXFileReference; includeInIndex = 0; lastKnownFileType = wrapper.application; path = TexasWater.app; sourceTree = BUILT_PRODUCTS_DIR; };
+		680401CB5FADA933AAFA5CCF /* Texas Water.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = "Texas Water.app"; sourceTree = BUILT_PRODUCTS_DIR; };
 		7C0A38CDEDD7E7DE677DF778 /* Assets.xcassets */ = {isa = PBXFileReference; lastKnownFileType = folder.assetcatalog; path = Assets.xcassets; sourceTree = "<group>"; };
 		90EE5317B3333C81DB9E0BCE /* TexasWaterCore */ = {isa = PBXFileReference; lastKnownFileType = folder; name = TexasWaterCore; path = Packages/TexasWaterCore; sourceTree = SOURCE_ROOT; };
 		9A2330395D4CF259EDA912E2 /* ContentView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ContentView.swift; sourceTree = "<group>"; };
@@ -53,7 +53,7 @@
 		ABD398184CBC56F5034228A7 /* Products */ = {
 			isa = PBXGroup;
 			children = (
-				680401CB5FADA933AAFA5CCF /* TexasWater.app */,
+				680401CB5FADA933AAFA5CCF /* Texas Water.app */,
 			);
 			name = Products;
 			sourceTree = "<group>";
@@ -88,7 +88,7 @@
 				E0BD2BE9EB5BDF7D18125273 /* TexasWaterCore */,
 			);
 			productName = TexasWater;
-			productReference = 680401CB5FADA933AAFA5CCF /* TexasWater.app */;
+			productReference = 680401CB5FADA933AAFA5CCF /* Texas Water.app */;
 			productType = "com.apple.product-type.application";
 		};
 /* End PBXNativeTarget section */
@@ -221,8 +221,12 @@
 				ASSETCATALOG_COMPILER_GLOBAL_ACCENT_COLOR_NAME = AccentColor;
 				CODE_SIGN_IDENTITY = "iPhone Developer";
 				CODE_SIGN_STYLE = Automatic;
+				CURRENT_PROJECT_VERSION = 1;
+				DEVELOPMENT_TEAM = 77H7V8G86J;
 				GENERATE_INFOPLIST_FILE = YES;
 				INFOPLIST_KEY_CFBundleDisplayName = "Texas Water";
+				INFOPLIST_KEY_CFBundleShortVersionString = "$(MARKETING_VERSION)";
+				INFOPLIST_KEY_CFBundleVersion = "$(CURRENT_PROJECT_VERSION)";
 				INFOPLIST_KEY_LSApplicationCategoryType = "public.app-category.weather";
 				INFOPLIST_KEY_UIApplicationSceneManifest_Generation = YES;
 				INFOPLIST_KEY_UILaunchScreen_Generation = YES;
@@ -230,6 +234,7 @@
 					"$(inherited)",
 					"@executable_path/Frameworks",
 				);
+				MARKETING_VERSION = 1.0.0;
 				PRODUCT_BUNDLE_IDENTIFIER = com.ryanshores.TexasWater;
 				PRODUCT_NAME = "Texas Water";
 				SDKROOT = iphoneos;
@@ -301,8 +306,12 @@
 				ASSETCATALOG_COMPILER_GLOBAL_ACCENT_COLOR_NAME = AccentColor;
 				CODE_SIGN_IDENTITY = "iPhone Developer";
 				CODE_SIGN_STYLE = Automatic;
+				CURRENT_PROJECT_VERSION = 1;
+				DEVELOPMENT_TEAM = 77H7V8G86J;
 				GENERATE_INFOPLIST_FILE = YES;
 				INFOPLIST_KEY_CFBundleDisplayName = "Texas Water";
+				INFOPLIST_KEY_CFBundleShortVersionString = "$(MARKETING_VERSION)";
+				INFOPLIST_KEY_CFBundleVersion = "$(CURRENT_PROJECT_VERSION)";
 				INFOPLIST_KEY_LSApplicationCategoryType = "public.app-category.weather";
 				INFOPLIST_KEY_UIApplicationSceneManifest_Generation = YES;
 				INFOPLIST_KEY_UILaunchScreen_Generation = YES;
@@ -310,6 +319,7 @@
 					"$(inherited)",
 					"@executable_path/Frameworks",
 				);
+				MARKETING_VERSION = 1.0.0;
 				PRODUCT_BUNDLE_IDENTIFIER = com.ryanshores.TexasWater;
 				PRODUCT_NAME = "Texas Water";
 				SDKROOT = iphoneos;
