@@ -1,0 +1,7 @@
+.DS_Store
+.build/
+DerivedData/
+*.xcuserstate
+xcuserdata/
+phase-0-report.json
+phase-0-smoke-report.json

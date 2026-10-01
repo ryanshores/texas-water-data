@@ -1,0 +1,20 @@
+{
+  "Travis": {
+    "area": 17541.0,
+    "condensed_name": "Travis",
+    "conservation_capacity": 1098044.0,
+    "conservation_pool_elevation": 681.0,
+    "conservation_storage": 979476.0,
+    "dead_pool_elevation": 535.75,
+    "elevation": 674.52,
+    "flood_control_lake": null,
+    "full_name": "Lake Travis",
+    "gauge_location": {"coordinates": [-97.906, 30.392], "type": "Point"},
+    "percent_full": 89.2,
+    "short_name": "Travis",
+    "tags": ["region_lower_colorado", "water_supply", "texas", "major", "basin_colorado"],
+    "timestamp": "2026-10-01",
+    "volume": 996508.0,
+    "volume_under_conservation_pool_elevation": 1115076.0
+  }
+}
