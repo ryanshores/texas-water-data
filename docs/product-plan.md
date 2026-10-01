@@ -90,9 +90,10 @@ MapKit, SwiftData, WidgetKit, App Intents, and BackgroundTasks.
 
 ### Phase 1 — reservoir MVP
 
-- Today dashboard, favorites, movers, full/low rankings.
-- Search, filtering, detail charts, and map.
+- Today dashboard, favorites, movers, full/low rankings. **Implemented.**
+- Search, filtering, detail charts, and map. **Implemented.**
 - Backend ingestion, normalized API, offline cache, and freshness states.
+  **Implemented locally; production deployment and history backfill remain.**
 - Small and medium widgets.
 - Accessibility, TestFlight, and source attribution.
 

@@ -1,29 +1,25 @@
 import SwiftUI
-import TexasWaterCore
 
 struct ContentView: View {
+    @StateObject private var store = ReservoirDataStore()
+
     var body: some View {
-        NavigationStack {
-            VStack(spacing: 20) {
-                Image(systemName: "water.waves")
-                    .font(.system(size: 56))
-                    .foregroundStyle(.blue)
-                    .accessibilityHidden(true)
+        TabView {
+            TodayView()
+                .tabItem { Label("Today", systemImage: "drop.fill") }
 
-                Text("Texas Water")
-                    .font(.largeTitle.bold())
+            ReservoirListView()
+                .tabItem { Label("Reservoirs", systemImage: "list.bullet") }
 
-                Text("Reservoir monitoring groundwork is ready. The next phase builds the Today dashboard, favorites, movers, and detail charts.")
-                    .multilineTextAlignment(.center)
-                    .foregroundStyle(.secondary)
+            ReservoirMapView()
+                .tabItem { Label("Map", systemImage: "map") }
 
-                Label("Phase 0 complete", systemImage: "checkmark.circle.fill")
-                    .font(.headline)
-                    .foregroundStyle(.green)
-            }
-            .padding(32)
-            .navigationTitle("Today")
+            AboutView()
+                .tabItem { Label("About", systemImage: "info.circle") }
         }
+        .tint(.waterBlue)
+        .environmentObject(store)
+        .task { await store.load() }
     }
 }
 

@@ -7,18 +7,42 @@
 	objects = {
 
 /* Begin PBXBuildFile section */
+		0551E5E7043A82AFD06E9CDC /* AppEnvironment.swift in Sources */ = {isa = PBXBuildFile; fileRef = CB5F60F64EB5650E09C86242 /* AppEnvironment.swift */; };
 		1B348E4B9573FFF797C70089 /* ContentView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 9A2330395D4CF259EDA912E2 /* ContentView.swift */; };
+		307A2307E82437087999A278 /* ReservoirListView.swift in Sources */ = {isa = PBXBuildFile; fileRef = AD961C2804A8BE786FAACEB7 /* ReservoirListView.swift */; };
+		376AB964AA33EBD4EBDB13F2 /* WaterFormatting.swift in Sources */ = {isa = PBXBuildFile; fileRef = 53B0EBB49DA8A5E306922489 /* WaterFormatting.swift */; };
 		52EBEC298A77D78C36689341 /* Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = 7C0A38CDEDD7E7DE677DF778 /* Assets.xcassets */; };
+		53F8405B87E811D3BD74D741 /* ReservoirMapView.swift in Sources */ = {isa = PBXBuildFile; fileRef = F4AB83A975A728428F1F21ED /* ReservoirMapView.swift */; };
+		5EEE9D215138E32A82058369 /* DashboardSection.swift in Sources */ = {isa = PBXBuildFile; fileRef = BB1C0D0E82A11223FDF1D3C6 /* DashboardSection.swift */; };
+		7198891B5BC1AF97295C5891 /* ReservoirDataStore.swift in Sources */ = {isa = PBXBuildFile; fileRef = 5CB01077DA0996E6B571F670 /* ReservoirDataStore.swift */; };
 		7BA1EE7594E0B2E479678EFD /* TexasWaterCore in Frameworks */ = {isa = PBXBuildFile; productRef = E0BD2BE9EB5BDF7D18125273 /* TexasWaterCore */; };
+		85190710F3C50EAC2D273C8C /* ReservoirDetailView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 09EE94ED7175994401FA3B6E /* ReservoirDetailView.swift */; };
+		969A6E800C1A83BD1FCBB8C0 /* DashboardCache.swift in Sources */ = {isa = PBXBuildFile; fileRef = A66BFA98AF8AB8620727E12D /* DashboardCache.swift */; };
+		A5D59CA80B8CBD4E71FD1A2F /* ReservoirRow.swift in Sources */ = {isa = PBXBuildFile; fileRef = 97CC3934906089EAA367E952 /* ReservoirRow.swift */; };
 		BE6653AD3E2BC0F3D0C9170E /* TexasWaterApp.swift in Sources */ = {isa = PBXBuildFile; fileRef = 252335BE49976F8049BD4DC9 /* TexasWaterApp.swift */; };
+		C0D050DA293D46BEA1E279EB /* SummaryHeroCard.swift in Sources */ = {isa = PBXBuildFile; fileRef = F556DEA25DD9BCCE2ED09191 /* SummaryHeroCard.swift */; };
+		D81758A706C533558BE98E86 /* TodayView.swift in Sources */ = {isa = PBXBuildFile; fileRef = E35308719F123C32DC78621B /* TodayView.swift */; };
+		EF0887DADEA4D4F9A0BB0D86 /* AboutView.swift in Sources */ = {isa = PBXBuildFile; fileRef = AC5867C66D98CC91F235BA62 /* AboutView.swift */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXFileReference section */
+		09EE94ED7175994401FA3B6E /* ReservoirDetailView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ReservoirDetailView.swift; sourceTree = "<group>"; };
 		252335BE49976F8049BD4DC9 /* TexasWaterApp.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TexasWaterApp.swift; sourceTree = "<group>"; };
-		680401CB5FADA933AAFA5CCF /* Texas Water.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = "Texas Water.app"; sourceTree = BUILT_PRODUCTS_DIR; };
+		53B0EBB49DA8A5E306922489 /* WaterFormatting.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = WaterFormatting.swift; sourceTree = "<group>"; };
+		5CB01077DA0996E6B571F670 /* ReservoirDataStore.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ReservoirDataStore.swift; sourceTree = "<group>"; };
 		7C0A38CDEDD7E7DE677DF778 /* Assets.xcassets */ = {isa = PBXFileReference; lastKnownFileType = folder.assetcatalog; path = Assets.xcassets; sourceTree = "<group>"; };
+		8B0C07FE0ED946E9E7B30A78 /* Texas Water.app */ = {isa = PBXFileReference; includeInIndex = 0; lastKnownFileType = wrapper.application; path = "Texas Water.app"; sourceTree = BUILT_PRODUCTS_DIR; };
 		90EE5317B3333C81DB9E0BCE /* TexasWaterCore */ = {isa = PBXFileReference; lastKnownFileType = folder; name = TexasWaterCore; path = Packages/TexasWaterCore; sourceTree = SOURCE_ROOT; };
+		97CC3934906089EAA367E952 /* ReservoirRow.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ReservoirRow.swift; sourceTree = "<group>"; };
 		9A2330395D4CF259EDA912E2 /* ContentView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ContentView.swift; sourceTree = "<group>"; };
+		A66BFA98AF8AB8620727E12D /* DashboardCache.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DashboardCache.swift; sourceTree = "<group>"; };
+		AC5867C66D98CC91F235BA62 /* AboutView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AboutView.swift; sourceTree = "<group>"; };
+		AD961C2804A8BE786FAACEB7 /* ReservoirListView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ReservoirListView.swift; sourceTree = "<group>"; };
+		BB1C0D0E82A11223FDF1D3C6 /* DashboardSection.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DashboardSection.swift; sourceTree = "<group>"; };
+		CB5F60F64EB5650E09C86242 /* AppEnvironment.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AppEnvironment.swift; sourceTree = "<group>"; };
+		E35308719F123C32DC78621B /* TodayView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TodayView.swift; sourceTree = "<group>"; };
+		F4AB83A975A728428F1F21ED /* ReservoirMapView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ReservoirMapView.swift; sourceTree = "<group>"; };
+		F556DEA25DD9BCCE2ED09191 /* SummaryHeroCard.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SummaryHeroCard.swift; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -41,6 +65,34 @@
 			path = Packages;
 			sourceTree = "<group>";
 		};
+		0C4AE85CBF9C19F1CF3C6001 /* Data */ = {
+			isa = PBXGroup;
+			children = (
+				A66BFA98AF8AB8620727E12D /* DashboardCache.swift */,
+				5CB01077DA0996E6B571F670 /* ReservoirDataStore.swift */,
+			);
+			path = Data;
+			sourceTree = "<group>";
+		};
+		10CF7FF8BC02F5E717900DDF /* Reservoirs */ = {
+			isa = PBXGroup;
+			children = (
+				09EE94ED7175994401FA3B6E /* ReservoirDetailView.swift */,
+				AD961C2804A8BE786FAACEB7 /* ReservoirListView.swift */,
+			);
+			path = Reservoirs;
+			sourceTree = "<group>";
+		};
+		36EAB4DFDE670DD4B2810FEB /* Components */ = {
+			isa = PBXGroup;
+			children = (
+				BB1C0D0E82A11223FDF1D3C6 /* DashboardSection.swift */,
+				97CC3934906089EAA367E952 /* ReservoirRow.swift */,
+				F556DEA25DD9BCCE2ED09191 /* SummaryHeroCard.swift */,
+			);
+			path = Components;
+			sourceTree = "<group>";
+		};
 		593C3E1F05E747DA42412967 = {
 			isa = PBXGroup;
 			children = (
@@ -50,10 +102,45 @@
 			);
 			sourceTree = "<group>";
 		};
+		6272B8E131FBB2AAFB5D936F /* About */ = {
+			isa = PBXGroup;
+			children = (
+				AC5867C66D98CC91F235BA62 /* AboutView.swift */,
+			);
+			path = About;
+			sourceTree = "<group>";
+		};
+		6BA9098E195490C680BB092A /* Today */ = {
+			isa = PBXGroup;
+			children = (
+				E35308719F123C32DC78621B /* TodayView.swift */,
+			);
+			path = Today;
+			sourceTree = "<group>";
+		};
+		760A10728A42F449D1BCF5B3 /* Map */ = {
+			isa = PBXGroup;
+			children = (
+				F4AB83A975A728428F1F21ED /* ReservoirMapView.swift */,
+			);
+			path = Map;
+			sourceTree = "<group>";
+		};
+		A09A188675C64234C3F29E9B /* Features */ = {
+			isa = PBXGroup;
+			children = (
+				6272B8E131FBB2AAFB5D936F /* About */,
+				760A10728A42F449D1BCF5B3 /* Map */,
+				10CF7FF8BC02F5E717900DDF /* Reservoirs */,
+				6BA9098E195490C680BB092A /* Today */,
+			);
+			path = Features;
+			sourceTree = "<group>";
+		};
 		ABD398184CBC56F5034228A7 /* Products */ = {
 			isa = PBXGroup;
 			children = (
-				680401CB5FADA933AAFA5CCF /* Texas Water.app */,
+				8B0C07FE0ED946E9E7B30A78 /* Texas Water.app */,
 			);
 			name = Products;
 			sourceTree = "<group>";
@@ -64,8 +151,29 @@
 				7C0A38CDEDD7E7DE677DF778 /* Assets.xcassets */,
 				9A2330395D4CF259EDA912E2 /* ContentView.swift */,
 				252335BE49976F8049BD4DC9 /* TexasWaterApp.swift */,
+				F99DA3C6694AC40B6D6AB4E1 /* App */,
+				36EAB4DFDE670DD4B2810FEB /* Components */,
+				0C4AE85CBF9C19F1CF3C6001 /* Data */,
+				A09A188675C64234C3F29E9B /* Features */,
+				F6050657A253FD24AD9C086F /* Support */,
 			);
 			path = TexasWaterApp;
+			sourceTree = "<group>";
+		};
+		F6050657A253FD24AD9C086F /* Support */ = {
+			isa = PBXGroup;
+			children = (
+				53B0EBB49DA8A5E306922489 /* WaterFormatting.swift */,
+			);
+			path = Support;
+			sourceTree = "<group>";
+		};
+		F99DA3C6694AC40B6D6AB4E1 /* App */ = {
+			isa = PBXGroup;
+			children = (
+				CB5F60F64EB5650E09C86242 /* AppEnvironment.swift */,
+			);
+			path = App;
 			sourceTree = "<group>";
 		};
 /* End PBXGroup section */
@@ -88,7 +196,7 @@
 				E0BD2BE9EB5BDF7D18125273 /* TexasWaterCore */,
 			);
 			productName = TexasWater;
-			productReference = 680401CB5FADA933AAFA5CCF /* Texas Water.app */;
+			productReference = 8B0C07FE0ED946E9E7B30A78 /* Texas Water.app */;
 			productType = "com.apple.product-type.application";
 		};
 /* End PBXNativeTarget section */
@@ -101,6 +209,7 @@
 				LastUpgradeCheck = 1600;
 				TargetAttributes = {
 					402FC205BA69E786E38D5CEC = {
+						DevelopmentTeam = 77H7V8G86J;
 						ProvisioningStyle = Automatic;
 					};
 				};
@@ -143,8 +252,20 @@
 			isa = PBXSourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				EF0887DADEA4D4F9A0BB0D86 /* AboutView.swift in Sources */,
+				0551E5E7043A82AFD06E9CDC /* AppEnvironment.swift in Sources */,
 				1B348E4B9573FFF797C70089 /* ContentView.swift in Sources */,
+				969A6E800C1A83BD1FCBB8C0 /* DashboardCache.swift in Sources */,
+				5EEE9D215138E32A82058369 /* DashboardSection.swift in Sources */,
+				7198891B5BC1AF97295C5891 /* ReservoirDataStore.swift in Sources */,
+				85190710F3C50EAC2D273C8C /* ReservoirDetailView.swift in Sources */,
+				307A2307E82437087999A278 /* ReservoirListView.swift in Sources */,
+				53F8405B87E811D3BD74D741 /* ReservoirMapView.swift in Sources */,
+				A5D59CA80B8CBD4E71FD1A2F /* ReservoirRow.swift in Sources */,
+				C0D050DA293D46BEA1E279EB /* SummaryHeroCard.swift in Sources */,
 				BE6653AD3E2BC0F3D0C9170E /* TexasWaterApp.swift in Sources */,
+				D81758A706C533558BE98E86 /* TodayView.swift in Sources */,
+				376AB964AA33EBD4EBDB13F2 /* WaterFormatting.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -228,6 +349,7 @@
 				INFOPLIST_KEY_CFBundleShortVersionString = "$(MARKETING_VERSION)";
 				INFOPLIST_KEY_CFBundleVersion = "$(CURRENT_PROJECT_VERSION)";
 				INFOPLIST_KEY_LSApplicationCategoryType = "public.app-category.weather";
+				INFOPLIST_KEY_TEXAS_WATER_API_BASE_URL = "";
 				INFOPLIST_KEY_UIApplicationSceneManifest_Generation = YES;
 				INFOPLIST_KEY_UILaunchScreen_Generation = YES;
 				LD_RUNPATH_SEARCH_PATHS = (
@@ -313,6 +435,7 @@
 				INFOPLIST_KEY_CFBundleShortVersionString = "$(MARKETING_VERSION)";
 				INFOPLIST_KEY_CFBundleVersion = "$(CURRENT_PROJECT_VERSION)";
 				INFOPLIST_KEY_LSApplicationCategoryType = "public.app-category.weather";
+				INFOPLIST_KEY_TEXAS_WATER_API_BASE_URL = "";
 				INFOPLIST_KEY_UIApplicationSceneManifest_Generation = YES;
 				INFOPLIST_KEY_UILaunchScreen_Generation = YES;
 				LD_RUNPATH_SEARCH_PATHS = (

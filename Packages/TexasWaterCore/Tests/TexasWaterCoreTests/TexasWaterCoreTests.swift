@@ -54,6 +54,27 @@ final class TexasWaterCoreTests: XCTestCase {
         XCTAssertEqual(TWDBClient.extractHistoricalSlugs(from: html), ["buchanan", "travis"])
     }
 
+    func testBuildsDashboardAndClassifiesReservoirs() throws {
+        let data = try fixture(named: "recent-conditions", extension: "json")
+        let decoded = try JSONDecoder().decode([String: ReservoirSnapshot].self, from: data)
+        let dashboard = ReservoirCatalogBuilder.build(from: decoded)
+        let travis = try XCTUnwrap(dashboard.reservoirs.first)
+
+        XCTAssertEqual(dashboard.statewidePercentFull ?? 0, 89.2, accuracy: 0.001)
+        XCTAssertEqual(travis.slug, "travis")
+        XCTAssertEqual(travis.status, .normal)
+        XCTAssertEqual(travis.heightFromConservationPool ?? 0, -6.48, accuracy: 0.001)
+    }
+
+    func testStatusThresholds() {
+        XCTAssertEqual(ReservoirStatus.classify(percentFull: 100), .nearFull)
+        XCTAssertEqual(ReservoirStatus.classify(percentFull: 95), .nearFull)
+        XCTAssertEqual(ReservoirStatus.classify(percentFull: 25), .normal)
+        XCTAssertEqual(ReservoirStatus.classify(percentFull: 24.9), .low)
+        XCTAssertEqual(ReservoirStatus.classify(percentFull: 9.9), .critical)
+        XCTAssertEqual(ReservoirStatus.classify(percentFull: nil), .unavailable)
+    }
+
     private func fixture(named name: String, extension fileExtension: String) throws -> Data {
         let url = try XCTUnwrap(
             Bundle.module.url(forResource: name, withExtension: fileExtension, subdirectory: "Fixtures")
