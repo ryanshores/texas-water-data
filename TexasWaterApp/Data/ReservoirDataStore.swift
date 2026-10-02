@@ -23,10 +23,10 @@ final class ReservoirDataStore: ObservableObject {
     private let apiClient: TexasWaterAPIClient?
     private let cache = DashboardCache()
     private let defaults: UserDefaults
-    private let favoritesKey = "favoriteReservoirIDs"
+    private let favoritesKey = SharedWaterData.favoritesKey
 
-    init(defaults: UserDefaults = .standard) {
-        self.defaults = defaults
+    init(defaults: UserDefaults? = nil) {
+        self.defaults = defaults ?? SharedWaterData.defaults
         favoriteIDs = Set(defaults.stringArray(forKey: favoritesKey) ?? [])
         apiClient = AppEnvironment.backendURL.map(TexasWaterAPIClient.init(baseURL:))
     }
@@ -76,7 +76,7 @@ final class ReservoirDataStore: ObservableObject {
         defer { isRefreshing = false }
 
         do {
-            let fresh: ReservoirDashboard
+            var fresh: ReservoirDashboard
             if let apiClient {
                 do {
                     fresh = try await apiClient.fetchDashboard()
@@ -117,9 +117,9 @@ final class ReservoirDataStore: ObservableObject {
             if let apiClient {
                 do {
                     let backendHistory = try await apiClient.fetchHistory(reservoirID: reservoir.id)
-                    history = backendHistory.isEmpty
-                        ? try await twdbClient.fetchHistory(slug: reservoir.slug)
-                        : backendHistory
+                    history = coversOneYear(backendHistory)
+                        ? backendHistory
+                        : try await twdbClient.fetchHistory(slug: reservoir.slug)
                 } catch {
                     history = try await twdbClient.fetchHistory(slug: reservoir.slug)
                 }
@@ -149,6 +149,21 @@ final class ReservoirDataStore: ObservableObject {
     }
 
     private func directDashboard() async throws -> ReservoirDashboard {
-        ReservoirCatalogBuilder.build(from: try await twdbClient.fetchCurrentConditions())
+        async let snapshots = twdbClient.fetchCurrentConditions()
+        async let links = twdbClient.fetchHistoricalLinks()
+        let current = try await snapshots
+        let officialLinks = (try? await links) ?? []
+        let slugsByName = officialLinks.reduce(into: [String: String]()) {
+            $0[$1.name] = $1.slug
+        }
+        return ReservoirCatalogBuilder.build(from: current, historySlugsByName: slugsByName)
+    }
+
+    private func coversOneYear(_ observations: [ReservoirObservation]) -> Bool {
+        guard let first = observations.min(by: { $0.date < $1.date })?.date,
+              let last = observations.max(by: { $0.date < $1.date })?.date else {
+            return false
+        }
+        return last.timeIntervalSince(first) >= 363 * 86_400
     }
 }

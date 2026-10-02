@@ -1,7 +1,8 @@
 import { readDashboard, readHistory, upsertCurrentConditions } from "./database";
-import { normalizeSnapshot } from "./normalize";
+import { extractOfficialSlugMap, normalizeSnapshot, slugify } from "./normalize";
 
 const TWDB_CURRENT_URL = "https://waterdatafortexas.org/reservoirs/recent-conditions.json";
+const TWDB_STATEWIDE_URL = "https://waterdatafortexas.org/reservoirs/statewide";
 
 export default {
   async fetch(request, env): Promise<Response> {
@@ -60,19 +61,28 @@ export async function ingestCurrentConditions(db: D1Database): Promise<number> {
   ).bind(runID, startedAt).run();
 
   try {
-    const response = await fetch(TWDB_CURRENT_URL, {
-      headers: { "User-Agent": "TexasWaterAPI/0.1" },
-      signal: AbortSignal.timeout(30_000),
-    });
-    if (!response.ok) throw new Error(`TWDB returned HTTP ${response.status}`);
-    const contentLength = Number(response.headers.get("content-length") ?? "0");
-    if (contentLength > 2_000_000) throw new Error("TWDB response exceeded size limit");
-    const body: unknown = await response.json();
+    const [currentText, statewideHTML] = await Promise.all([
+      fetchTWDBText(TWDB_CURRENT_URL, 2_000_000),
+      fetchTWDBText(TWDB_STATEWIDE_URL, 2_000_000),
+    ]);
+    const body: unknown = JSON.parse(currentText);
     if (!isRecord(body)) throw new Error("TWDB response was not an object");
+    const officialSlugs = extractOfficialSlugMap(statewideHTML);
+    if (officialSlugs.size < 100) {
+      throw new Error(`TWDB statewide page contained only ${officialSlugs.size} official slugs`);
+    }
 
-    const reservoirs = Object.entries(body)
+    const normalized = Object.entries(body)
       .map(([id, value]) => normalizeSnapshot(id, value))
       .filter((value) => value !== null);
+    const missingSlugs = normalized.filter((reservoir) => !officialSlugs.has(slugify(reservoir.shortName)));
+    if (missingSlugs.length > 0) {
+      throw new Error(`TWDB statewide page did not map ${missingSlugs.length} reservoir names`);
+    }
+    const reservoirs = normalized.map((reservoir) => ({
+      ...reservoir,
+      slug: officialSlugs.get(slugify(reservoir.shortName))!,
+    }));
     if (reservoirs.length < 100) throw new Error(`TWDB response contained only ${reservoirs.length} valid records`);
 
     await upsertCurrentConditions(db, reservoirs);
@@ -87,6 +97,43 @@ export async function ingestCurrentConditions(db: D1Database): Promise<number> {
     `).bind(new Date().toISOString(), message, runID).run();
     throw error;
   }
+}
+
+async function fetchTWDBText(url: string, sizeLimit: number): Promise<string> {
+  const response = await fetch(url, {
+    headers: { "User-Agent": "TexasWaterAPI/0.1" },
+    signal: AbortSignal.timeout(30_000),
+  });
+  if (!response.ok) throw new Error(`TWDB returned HTTP ${response.status} for ${url}`);
+  const contentLength = Number(response.headers.get("content-length") ?? "0");
+  if (contentLength > sizeLimit) throw new Error(`TWDB response exceeded size limit for ${url}`);
+  if (!response.body) throw new Error(`TWDB returned an empty response body for ${url}`);
+
+  const reader = response.body.getReader();
+  const chunks: Uint8Array[] = [];
+  let length = 0;
+  try {
+    while (true) {
+      const { done, value } = await reader.read();
+      if (done) break;
+      length += value.byteLength;
+      if (length > sizeLimit) {
+        await reader.cancel("TWDB response exceeded size limit");
+        throw new Error(`TWDB response exceeded size limit for ${url}`);
+      }
+      chunks.push(value);
+    }
+  } finally {
+    reader.releaseLock();
+  }
+
+  const body = new Uint8Array(length);
+  let offset = 0;
+  for (const chunk of chunks) {
+    body.set(chunk, offset);
+    offset += chunk.byteLength;
+  }
+  return new TextDecoder().decode(body);
 }
 
 function json(body: object, status = 200, headers: Record<string, string> = {}): Response {

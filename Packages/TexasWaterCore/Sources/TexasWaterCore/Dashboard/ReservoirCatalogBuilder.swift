@@ -1,8 +1,16 @@
 import Foundation
 
 public enum ReservoirCatalogBuilder {
-    public static func build(from snapshots: [String: ReservoirSnapshot]) -> ReservoirDashboard {
-        let reservoirs = snapshots.values.compactMap(makeSummary).sorted {
+    public static func build(
+        from snapshots: [String: ReservoirSnapshot],
+        historySlugsByName: [String: String] = [:]
+    ) -> ReservoirDashboard {
+        let officialSlugs = historySlugsByName.reduce(into: [String: String]()) {
+            $0[slugify($1.key)] = $1.value
+        }
+        let reservoirs = snapshots.values.compactMap {
+            makeSummary($0, officialSlugs: officialSlugs)
+        }.sorted {
             $0.shortName.localizedCaseInsensitiveCompare($1.shortName) == .orderedAscending
         }
         let storage = reservoirs.compactMap(\.conservationStorage).reduce(0, +)
@@ -31,14 +39,18 @@ public enum ReservoirCatalogBuilder {
         return value.replacingOccurrences(of: "_", with: " ").capitalized
     }
 
-    private static func makeSummary(_ snapshot: ReservoirSnapshot) -> ReservoirSummary? {
+    private static func makeSummary(
+        _ snapshot: ReservoirSnapshot,
+        officialSlugs: [String: String]
+    ) -> ReservoirSummary? {
         guard let latitude = snapshot.gaugeLocation.latitude,
               let longitude = snapshot.gaugeLocation.longitude else {
             return nil
         }
+        let nameKey = slugify(snapshot.shortName)
         return ReservoirSummary(
             id: snapshot.condensedName,
-            slug: slugify(snapshot.shortName),
+            slug: officialSlugs[nameKey] ?? nameKey,
             shortName: snapshot.shortName,
             fullName: snapshot.fullName,
             observedAt: snapshot.timestamp,

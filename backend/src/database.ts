@@ -39,12 +39,28 @@ interface HistoryRow {
 
 export async function upsertCurrentConditions(db: D1Database, reservoirs: NormalizedReservoir[]): Promise<void> {
   const ingestedAt = new Date().toISOString();
-  const statements = reservoirs.flatMap((reservoir) => [
+  const payload = JSON.stringify(reservoirs);
+  await db.batch([
     db.prepare(`
       INSERT INTO reservoirs (
         id, slug, short_name, full_name, latitude, longitude, basin, region,
         is_water_supply, is_flood_control, conservation_pool_elevation, updated_at
-      ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+      )
+      SELECT
+        json_extract(value, '$.id'),
+        json_extract(value, '$.slug'),
+        json_extract(value, '$.shortName'),
+        json_extract(value, '$.fullName'),
+        json_extract(value, '$.latitude'),
+        json_extract(value, '$.longitude'),
+        json_extract(value, '$.basin'),
+        json_extract(value, '$.region'),
+        json_extract(value, '$.isWaterSupply'),
+        json_extract(value, '$.isFloodControl'),
+        json_extract(value, '$.conservationPoolElevation'),
+        ?
+      FROM json_each(?)
+      WHERE true
       ON CONFLICT(id) DO UPDATE SET
         slug = excluded.slug,
         short_name = excluded.short_name,
@@ -57,25 +73,25 @@ export async function upsertCurrentConditions(db: D1Database, reservoirs: Normal
         is_flood_control = excluded.is_flood_control,
         conservation_pool_elevation = excluded.conservation_pool_elevation,
         updated_at = excluded.updated_at
-    `).bind(
-      reservoir.id,
-      reservoir.slug,
-      reservoir.shortName,
-      reservoir.fullName,
-      reservoir.latitude,
-      reservoir.longitude,
-      reservoir.basin,
-      reservoir.region,
-      reservoir.isWaterSupply ? 1 : 0,
-      reservoir.isFloodControl ? 1 : 0,
-      reservoir.conservationPoolElevation,
-      ingestedAt,
-    ),
+    `).bind(ingestedAt, payload),
     db.prepare(`
       INSERT INTO observations (
         reservoir_id, date, percent_full, elevation, surface_area, reservoir_storage,
         conservation_storage, conservation_capacity, dead_pool_capacity, ingested_at
-      ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+      )
+      SELECT
+        json_extract(value, '$.id'),
+        json_extract(value, '$.observedAt'),
+        json_extract(value, '$.percentFull'),
+        json_extract(value, '$.elevation'),
+        json_extract(value, '$.surfaceArea'),
+        json_extract(value, '$.reservoirStorage'),
+        json_extract(value, '$.conservationStorage'),
+        json_extract(value, '$.conservationCapacity'),
+        json_extract(value, '$.deadPoolCapacity'),
+        ?
+      FROM json_each(?)
+      WHERE true
       ON CONFLICT(reservoir_id, date) DO UPDATE SET
         percent_full = excluded.percent_full,
         elevation = excluded.elevation,
@@ -85,23 +101,8 @@ export async function upsertCurrentConditions(db: D1Database, reservoirs: Normal
         conservation_capacity = excluded.conservation_capacity,
         dead_pool_capacity = excluded.dead_pool_capacity,
         ingested_at = excluded.ingested_at
-    `).bind(
-      reservoir.id,
-      reservoir.observedAt,
-      reservoir.percentFull,
-      reservoir.elevation,
-      reservoir.surfaceArea,
-      reservoir.reservoirStorage,
-      reservoir.conservationStorage,
-      reservoir.conservationCapacity,
-      reservoir.deadPoolCapacity,
-      ingestedAt,
-    ),
+    `).bind(ingestedAt, payload),
   ]);
-
-  for (let index = 0; index < statements.length; index += 50) {
-    await db.batch(statements.slice(index, index + 50));
-  }
 }
 
 export async function readDashboard(db: D1Database): Promise<{
@@ -135,23 +136,45 @@ export async function readDashboard(db: D1Database): Promise<{
       CASE WHEN p365.conservation_capacity IS NULL OR c.conservation_capacity IS NULL
                 OR ABS(p365.conservation_capacity - c.conservation_capacity) > MAX(1, c.conservation_capacity * 0.000001)
            THEN NULL ELSE c.percent_full - p365.percent_full END AS one_year,
-      c.conservation_storage - p7.conservation_storage AS storage_seven_days
+      CASE WHEN p7.conservation_capacity IS NULL OR c.conservation_capacity IS NULL
+                OR ABS(p7.conservation_capacity - c.conservation_capacity) > MAX(1, c.conservation_capacity * 0.000001)
+           THEN NULL ELSE c.conservation_storage - p7.conservation_storage END AS storage_seven_days
     FROM current c
     LEFT JOIN observations p1 ON p1.rowid = (
-      SELECT rowid FROM observations WHERE reservoir_id = c.id AND date <= date(c.observed_at, '-1 day')
-      ORDER BY date DESC LIMIT 1
+      SELECT rowid FROM observations
+      WHERE reservoir_id = c.id
+        AND percent_full IS NOT NULL
+        AND observations.date < c.observed_at
+        AND ABS(julianday(observations.date) - julianday(c.observed_at, '-1 day')) <= 2
+      ORDER BY ABS(julianday(observations.date) - julianday(c.observed_at, '-1 day')), observations.date DESC
+      LIMIT 1
     )
     LEFT JOIN observations p7 ON p7.rowid = (
-      SELECT rowid FROM observations WHERE reservoir_id = c.id AND date <= date(c.observed_at, '-7 day')
-      ORDER BY date DESC LIMIT 1
+      SELECT rowid FROM observations
+      WHERE reservoir_id = c.id
+        AND percent_full IS NOT NULL
+        AND observations.date < c.observed_at
+        AND ABS(julianday(observations.date) - julianday(c.observed_at, '-7 day')) <= 2
+      ORDER BY ABS(julianday(observations.date) - julianday(c.observed_at, '-7 day')), observations.date DESC
+      LIMIT 1
     )
     LEFT JOIN observations p30 ON p30.rowid = (
-      SELECT rowid FROM observations WHERE reservoir_id = c.id AND date <= date(c.observed_at, '-30 day')
-      ORDER BY date DESC LIMIT 1
+      SELECT rowid FROM observations
+      WHERE reservoir_id = c.id
+        AND percent_full IS NOT NULL
+        AND observations.date < c.observed_at
+        AND ABS(julianday(observations.date) - julianday(c.observed_at, '-30 day')) <= 2
+      ORDER BY ABS(julianday(observations.date) - julianday(c.observed_at, '-30 day')), observations.date DESC
+      LIMIT 1
     )
     LEFT JOIN observations p365 ON p365.rowid = (
-      SELECT rowid FROM observations WHERE reservoir_id = c.id AND date <= date(c.observed_at, '-365 day')
-      ORDER BY date DESC LIMIT 1
+      SELECT rowid FROM observations
+      WHERE reservoir_id = c.id
+        AND percent_full IS NOT NULL
+        AND observations.date < c.observed_at
+        AND ABS(julianday(observations.date) - julianday(c.observed_at, '-365 day')) <= 2
+      ORDER BY ABS(julianday(observations.date) - julianday(c.observed_at, '-365 day')), observations.date DESC
+      LIMIT 1
     )
     ORDER BY c.short_name COLLATE NOCASE
   `);

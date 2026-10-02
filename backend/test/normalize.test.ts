@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest";
-import { normalizeSnapshot, slugify } from "../src/normalize";
+import { extractOfficialSlugMap, normalizeSnapshot, slugify } from "../src/normalize";
 
 describe("reservoir normalization", () => {
   it("normalizes a TWDB reservoir", () => {
@@ -34,5 +34,13 @@ describe("reservoir normalization", () => {
   it("creates official-style slugs", () => {
     expect(slugify("B. A. Steinhagen")).toBe("b-a-steinhagen");
     expect(slugify("Lake O' the Pines")).toBe("lake-o-the-pines");
+  });
+
+  it("maps display names to the official statewide-page slugs", () => {
+    const slugs = extractOfficialSlugMap(`
+      <a href="/reservoirs/individual/custom-pines">Lake O&#39; the Pines</a>
+    `);
+
+    expect(slugs.get("lake-o-the-pines")).toBe("custom-pines");
   });
 });

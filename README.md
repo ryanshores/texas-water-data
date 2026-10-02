@@ -6,7 +6,7 @@ conditions: what is full, what is low, and what is changing fastest.
 The project now has a working **Phase 1 reservoir MVP foundation**. It includes:
 
 - a generated SwiftUI iOS app with Today, reservoir browsing, detail charts,
-  favorites, and a map;
+  favorites, a map, and small/medium home-screen widgets;
 - a reusable `TexasWaterCore` Swift package;
 - typed decoders for TWDB current-condition JSON and historical CSV;
 - change calculations that guard against stale data and capacity revisions;

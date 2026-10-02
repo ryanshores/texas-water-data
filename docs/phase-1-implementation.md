@@ -10,6 +10,8 @@ The native app now provides the main reservoir MVP:
 - reservoir detail pages with current measurements, source attribution, and
   30-day or one-year Swift Charts history;
 - a statewide MapKit view with status markers and detail sheets;
+- small and medium WidgetKit layouts: a favorite-or-priority reservoir summary
+  and a multi-reservoir overview, with direct refresh and saved-data fallback;
 - persistent favorites, disk-cached dashboard/history data, offline startup,
   pull-to-refresh, freshness labeling, and direct-TWDB fallback;
 - accessible text labels that do not rely on status color alone.
@@ -19,10 +21,12 @@ The backend foundation is also implemented:
 - a scheduled Cloudflare Worker that validates and ingests the TWDB
   current-conditions feed every two hours;
 - a normalized D1 schema for reservoirs, observations, and ingestion runs;
+- official statewide-page history-slug mapping, kept with the normalized
+  reservoir catalog rather than inferred from a display name;
 - guarded 1-day, 7-day, 30-day, and 1-year change queries that suppress changes
-  across capacity revisions;
+  across capacity revisions, stale observations, and missing percentage values;
 - dashboard and history endpoints with bounded upstream reads, caching headers,
-  structured logs, and safe errors;
+  structured logs, safe errors, and atomic catalog/observation ingestion;
 - Worker-runtime normalization and D1 query tests plus a deploy dry-run.
 
 The iOS app works without the backend by reading the official TWDB JSON and CSV
@@ -36,7 +40,9 @@ response and falls back automatically if the service is empty or unavailable.
 - Backfill historical observations so movers are populated immediately; until
   then they accumulate as scheduled daily observations arrive, while detail
   charts continue to use the official TWDB CSV fallback.
-- Add small and medium WidgetKit targets with an App Group cache.
+- Enable the `group.com.ryanshores.TexasWater` App Group for both bundle IDs in
+  the Apple Developer account so widget favorites and the app cache can share
+  storage on a signed device.
 - Complete device-level Dynamic Type, VoiceOver, high-contrast, map-density,
   and degraded-network QA.
 - Configure App Store/TestFlight metadata, privacy details, and distribution

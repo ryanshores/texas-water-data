@@ -17,19 +17,52 @@
 		7198891B5BC1AF97295C5891 /* ReservoirDataStore.swift in Sources */ = {isa = PBXBuildFile; fileRef = 5CB01077DA0996E6B571F670 /* ReservoirDataStore.swift */; };
 		7BA1EE7594E0B2E479678EFD /* TexasWaterCore in Frameworks */ = {isa = PBXBuildFile; productRef = E0BD2BE9EB5BDF7D18125273 /* TexasWaterCore */; };
 		85190710F3C50EAC2D273C8C /* ReservoirDetailView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 09EE94ED7175994401FA3B6E /* ReservoirDetailView.swift */; };
+		8ED9C717D029FA5A5AB01EBB /* TexasWaterCore in Frameworks */ = {isa = PBXBuildFile; productRef = ED3414E196B2423559F10374 /* TexasWaterCore */; };
+		94DD8C1568D445207F76A892 /* Texas Water Widget.appex in Embed Foundation Extensions */ = {isa = PBXBuildFile; fileRef = BB6F93893D2A3E57BC8314C5 /* Texas Water Widget.appex */; settings = {ATTRIBUTES = (RemoveHeadersOnCopy, ); }; };
 		969A6E800C1A83BD1FCBB8C0 /* DashboardCache.swift in Sources */ = {isa = PBXBuildFile; fileRef = A66BFA98AF8AB8620727E12D /* DashboardCache.swift */; };
+		9854BC4A2F2B47448BAA48EF /* WaterWidgetCache.swift in Sources */ = {isa = PBXBuildFile; fileRef = 61167902E5E3BA12ED34E6D7 /* WaterWidgetCache.swift */; };
+		A0C8644C8CDEDD646B281069 /* TexasWaterWidget.swift in Sources */ = {isa = PBXBuildFile; fileRef = EC7166B9359A9CA532EAE532 /* TexasWaterWidget.swift */; };
 		A5D59CA80B8CBD4E71FD1A2F /* ReservoirRow.swift in Sources */ = {isa = PBXBuildFile; fileRef = 97CC3934906089EAA367E952 /* ReservoirRow.swift */; };
 		BE6653AD3E2BC0F3D0C9170E /* TexasWaterApp.swift in Sources */ = {isa = PBXBuildFile; fileRef = 252335BE49976F8049BD4DC9 /* TexasWaterApp.swift */; };
+		C0C8C58A8EF713ABA2E75E06 /* WaterWidgetCache.swift in Sources */ = {isa = PBXBuildFile; fileRef = 61167902E5E3BA12ED34E6D7 /* WaterWidgetCache.swift */; };
 		C0D050DA293D46BEA1E279EB /* SummaryHeroCard.swift in Sources */ = {isa = PBXBuildFile; fileRef = F556DEA25DD9BCCE2ED09191 /* SummaryHeroCard.swift */; };
 		D81758A706C533558BE98E86 /* TodayView.swift in Sources */ = {isa = PBXBuildFile; fileRef = E35308719F123C32DC78621B /* TodayView.swift */; };
 		EF0887DADEA4D4F9A0BB0D86 /* AboutView.swift in Sources */ = {isa = PBXBuildFile; fileRef = AC5867C66D98CC91F235BA62 /* AboutView.swift */; };
 /* End PBXBuildFile section */
 
+/* Begin PBXContainerItemProxy section */
+		D69D65AD41FBF02096D560E7 /* PBXContainerItemProxy */ = {
+			isa = PBXContainerItemProxy;
+			containerPortal = 24379E49927A1EA1986A013D /* Project object */;
+			proxyType = 1;
+			remoteGlobalIDString = 09CF1D8C7C5B4158DE271EED;
+			remoteInfo = TexasWaterWidget;
+		};
+/* End PBXContainerItemProxy section */
+
+/* Begin PBXCopyFilesBuildPhase section */
+		A2BFE0B0B33411274BA3F0F0 /* Embed Foundation Extensions */ = {
+			isa = PBXCopyFilesBuildPhase;
+			buildActionMask = 2147483647;
+			dstPath = "";
+			dstSubfolderSpec = 13;
+			files = (
+				94DD8C1568D445207F76A892 /* Texas Water Widget.appex in Embed Foundation Extensions */,
+			);
+			name = "Embed Foundation Extensions";
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+/* End PBXCopyFilesBuildPhase section */
+
 /* Begin PBXFileReference section */
 		09EE94ED7175994401FA3B6E /* ReservoirDetailView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ReservoirDetailView.swift; sourceTree = "<group>"; };
 		252335BE49976F8049BD4DC9 /* TexasWaterApp.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TexasWaterApp.swift; sourceTree = "<group>"; };
+		3CCA109D9E69C1C94A05488E /* TexasWaterWidget.entitlements */ = {isa = PBXFileReference; lastKnownFileType = text.plist.entitlements; path = TexasWaterWidget.entitlements; sourceTree = "<group>"; };
 		53B0EBB49DA8A5E306922489 /* WaterFormatting.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = WaterFormatting.swift; sourceTree = "<group>"; };
 		5CB01077DA0996E6B571F670 /* ReservoirDataStore.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ReservoirDataStore.swift; sourceTree = "<group>"; };
+		61167902E5E3BA12ED34E6D7 /* WaterWidgetCache.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = WaterWidgetCache.swift; sourceTree = "<group>"; };
+		66B91B82B1F2EF5751FF9991 /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist; path = Info.plist; sourceTree = "<group>"; };
+		7AD441C27CD2757019178FA3 /* TexasWater.entitlements */ = {isa = PBXFileReference; lastKnownFileType = text.plist.entitlements; path = TexasWater.entitlements; sourceTree = "<group>"; };
 		7C0A38CDEDD7E7DE677DF778 /* Assets.xcassets */ = {isa = PBXFileReference; lastKnownFileType = folder.assetcatalog; path = Assets.xcassets; sourceTree = "<group>"; };
 		8B0C07FE0ED946E9E7B30A78 /* Texas Water.app */ = {isa = PBXFileReference; includeInIndex = 0; lastKnownFileType = wrapper.application; path = "Texas Water.app"; sourceTree = BUILT_PRODUCTS_DIR; };
 		90EE5317B3333C81DB9E0BCE /* TexasWaterCore */ = {isa = PBXFileReference; lastKnownFileType = folder; name = TexasWaterCore; path = Packages/TexasWaterCore; sourceTree = SOURCE_ROOT; };
@@ -39,8 +72,10 @@
 		AC5867C66D98CC91F235BA62 /* AboutView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AboutView.swift; sourceTree = "<group>"; };
 		AD961C2804A8BE786FAACEB7 /* ReservoirListView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ReservoirListView.swift; sourceTree = "<group>"; };
 		BB1C0D0E82A11223FDF1D3C6 /* DashboardSection.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DashboardSection.swift; sourceTree = "<group>"; };
+		BB6F93893D2A3E57BC8314C5 /* Texas Water Widget.appex */ = {isa = PBXFileReference; includeInIndex = 0; lastKnownFileType = "wrapper.app-extension"; path = "Texas Water Widget.appex"; sourceTree = BUILT_PRODUCTS_DIR; };
 		CB5F60F64EB5650E09C86242 /* AppEnvironment.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AppEnvironment.swift; sourceTree = "<group>"; };
 		E35308719F123C32DC78621B /* TodayView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TodayView.swift; sourceTree = "<group>"; };
+		EC7166B9359A9CA532EAE532 /* TexasWaterWidget.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TexasWaterWidget.swift; sourceTree = "<group>"; };
 		F4AB83A975A728428F1F21ED /* ReservoirMapView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ReservoirMapView.swift; sourceTree = "<group>"; };
 		F556DEA25DD9BCCE2ED09191 /* SummaryHeroCard.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SummaryHeroCard.swift; sourceTree = "<group>"; };
 /* End PBXFileReference section */
@@ -51,6 +86,14 @@
 			buildActionMask = 2147483647;
 			files = (
 				7BA1EE7594E0B2E479678EFD /* TexasWaterCore in Frameworks */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+		B80C7E4E85CE608FD7279692 /* Frameworks */ = {
+			isa = PBXFrameworksBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				8ED9C717D029FA5A5AB01EBB /* TexasWaterCore in Frameworks */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -97,7 +140,9 @@
 			isa = PBXGroup;
 			children = (
 				0B53FBBF849E72C291077AA9 /* Packages */,
+				949D26AAA1D4A3FEDDC1FA01 /* Shared */,
 				C07A108467DA14352DC4BDEC /* TexasWaterApp */,
+				C3C8400F05667918FD2E2093 /* TexasWaterWidget */,
 				ABD398184CBC56F5034228A7 /* Products */,
 			);
 			sourceTree = "<group>";
@@ -126,6 +171,14 @@
 			path = Map;
 			sourceTree = "<group>";
 		};
+		949D26AAA1D4A3FEDDC1FA01 /* Shared */ = {
+			isa = PBXGroup;
+			children = (
+				61167902E5E3BA12ED34E6D7 /* WaterWidgetCache.swift */,
+			);
+			path = Shared;
+			sourceTree = "<group>";
+		};
 		A09A188675C64234C3F29E9B /* Features */ = {
 			isa = PBXGroup;
 			children = (
@@ -140,6 +193,7 @@
 		ABD398184CBC56F5034228A7 /* Products */ = {
 			isa = PBXGroup;
 			children = (
+				BB6F93893D2A3E57BC8314C5 /* Texas Water Widget.appex */,
 				8B0C07FE0ED946E9E7B30A78 /* Texas Water.app */,
 			);
 			name = Products;
@@ -150,6 +204,7 @@
 			children = (
 				7C0A38CDEDD7E7DE677DF778 /* Assets.xcassets */,
 				9A2330395D4CF259EDA912E2 /* ContentView.swift */,
+				7AD441C27CD2757019178FA3 /* TexasWater.entitlements */,
 				252335BE49976F8049BD4DC9 /* TexasWaterApp.swift */,
 				F99DA3C6694AC40B6D6AB4E1 /* App */,
 				36EAB4DFDE670DD4B2810FEB /* Components */,
@@ -158,6 +213,16 @@
 				F6050657A253FD24AD9C086F /* Support */,
 			);
 			path = TexasWaterApp;
+			sourceTree = "<group>";
+		};
+		C3C8400F05667918FD2E2093 /* TexasWaterWidget */ = {
+			isa = PBXGroup;
+			children = (
+				66B91B82B1F2EF5751FF9991 /* Info.plist */,
+				3CCA109D9E69C1C94A05488E /* TexasWaterWidget.entitlements */,
+				EC7166B9359A9CA532EAE532 /* TexasWaterWidget.swift */,
+			);
+			path = TexasWaterWidget;
 			sourceTree = "<group>";
 		};
 		F6050657A253FD24AD9C086F /* Support */ = {
@@ -179,6 +244,25 @@
 /* End PBXGroup section */
 
 /* Begin PBXNativeTarget section */
+		09CF1D8C7C5B4158DE271EED /* TexasWaterWidget */ = {
+			isa = PBXNativeTarget;
+			buildConfigurationList = DD289F2498F348D62DE0E76C /* Build configuration list for PBXNativeTarget "TexasWaterWidget" */;
+			buildPhases = (
+				2CA747E148BD38860C9C822F /* Sources */,
+				B80C7E4E85CE608FD7279692 /* Frameworks */,
+			);
+			buildRules = (
+			);
+			dependencies = (
+			);
+			name = TexasWaterWidget;
+			packageProductDependencies = (
+				ED3414E196B2423559F10374 /* TexasWaterCore */,
+			);
+			productName = TexasWaterWidget;
+			productReference = BB6F93893D2A3E57BC8314C5 /* Texas Water Widget.appex */;
+			productType = "com.apple.product-type.app-extension";
+		};
 		402FC205BA69E786E38D5CEC /* TexasWater */ = {
 			isa = PBXNativeTarget;
 			buildConfigurationList = C14F5B93E860E4259C4F3E2E /* Build configuration list for PBXNativeTarget "TexasWater" */;
@@ -186,10 +270,12 @@
 				35577E4A0811A1AB8380CBBA /* Sources */,
 				B73ED1AAE11A4C9F0C02C5BC /* Resources */,
 				1B22FBE9A9D64D26C2F07939 /* Frameworks */,
+				A2BFE0B0B33411274BA3F0F0 /* Embed Foundation Extensions */,
 			);
 			buildRules = (
 			);
 			dependencies = (
+				E39C341B47DC2247DA91A4E9 /* PBXTargetDependency */,
 			);
 			name = TexasWater;
 			packageProductDependencies = (
@@ -208,6 +294,10 @@
 				BuildIndependentTargetsInParallel = YES;
 				LastUpgradeCheck = 1600;
 				TargetAttributes = {
+					09CF1D8C7C5B4158DE271EED = {
+						DevelopmentTeam = 77H7V8G86J;
+						ProvisioningStyle = Automatic;
+					};
 					402FC205BA69E786E38D5CEC = {
 						DevelopmentTeam = 77H7V8G86J;
 						ProvisioningStyle = Automatic;
@@ -232,6 +322,7 @@
 			projectRoot = "";
 			targets = (
 				402FC205BA69E786E38D5CEC /* TexasWater */,
+				09CF1D8C7C5B4158DE271EED /* TexasWaterWidget */,
 			);
 		};
 /* End PBXProject section */
@@ -248,6 +339,15 @@
 /* End PBXResourcesBuildPhase section */
 
 /* Begin PBXSourcesBuildPhase section */
+		2CA747E148BD38860C9C822F /* Sources */ = {
+			isa = PBXSourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				A0C8644C8CDEDD646B281069 /* TexasWaterWidget.swift in Sources */,
+				C0C8C58A8EF713ABA2E75E06 /* WaterWidgetCache.swift in Sources */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
 		35577E4A0811A1AB8380CBBA /* Sources */ = {
 			isa = PBXSourcesBuildPhase;
 			buildActionMask = 2147483647;
@@ -266,12 +366,44 @@
 				BE6653AD3E2BC0F3D0C9170E /* TexasWaterApp.swift in Sources */,
 				D81758A706C533558BE98E86 /* TodayView.swift in Sources */,
 				376AB964AA33EBD4EBDB13F2 /* WaterFormatting.swift in Sources */,
+				9854BC4A2F2B47448BAA48EF /* WaterWidgetCache.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
 /* End PBXSourcesBuildPhase section */
 
+/* Begin PBXTargetDependency section */
+		E39C341B47DC2247DA91A4E9 /* PBXTargetDependency */ = {
+			isa = PBXTargetDependency;
+			target = 09CF1D8C7C5B4158DE271EED /* TexasWaterWidget */;
+			targetProxy = D69D65AD41FBF02096D560E7 /* PBXContainerItemProxy */;
+		};
+/* End PBXTargetDependency section */
+
 /* Begin XCBuildConfiguration section */
+		2597B7C17669A339F5BEA059 /* Debug */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				APPLICATION_EXTENSION_API_ONLY = YES;
+				CODE_SIGN_ENTITLEMENTS = TexasWaterWidget/TexasWaterWidget.entitlements;
+				CODE_SIGN_STYLE = Automatic;
+				CURRENT_PROJECT_VERSION = 1;
+				DEVELOPMENT_TEAM = 77H7V8G86J;
+				INFOPLIST_FILE = TexasWaterWidget/Info.plist;
+				LD_RUNPATH_SEARCH_PATHS = (
+					"$(inherited)",
+					"@executable_path/Frameworks",
+					"@executable_path/../../Frameworks",
+				);
+				MARKETING_VERSION = 1.0.0;
+				PRODUCT_BUNDLE_IDENTIFIER = com.ryanshores.TexasWater.Widget;
+				PRODUCT_NAME = "Texas Water Widget";
+				SDKROOT = iphoneos;
+				SWIFT_VERSION = 6.0;
+				TARGETED_DEVICE_FAMILY = "1,2";
+			};
+			name = Debug;
+		};
 		4B3E5E0D9E4443410E6476E6 /* Debug */ = {
 			isa = XCBuildConfiguration;
 			buildSettings = {
@@ -335,11 +467,35 @@
 			};
 			name = Debug;
 		};
+		73F4BB72339D08937D38F49C /* Release */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				APPLICATION_EXTENSION_API_ONLY = YES;
+				CODE_SIGN_ENTITLEMENTS = TexasWaterWidget/TexasWaterWidget.entitlements;
+				CODE_SIGN_STYLE = Automatic;
+				CURRENT_PROJECT_VERSION = 1;
+				DEVELOPMENT_TEAM = 77H7V8G86J;
+				INFOPLIST_FILE = TexasWaterWidget/Info.plist;
+				LD_RUNPATH_SEARCH_PATHS = (
+					"$(inherited)",
+					"@executable_path/Frameworks",
+					"@executable_path/../../Frameworks",
+				);
+				MARKETING_VERSION = 1.0.0;
+				PRODUCT_BUNDLE_IDENTIFIER = com.ryanshores.TexasWater.Widget;
+				PRODUCT_NAME = "Texas Water Widget";
+				SDKROOT = iphoneos;
+				SWIFT_VERSION = 6.0;
+				TARGETED_DEVICE_FAMILY = "1,2";
+			};
+			name = Release;
+		};
 		CCDF322C12DC2354EF39C3CB /* Debug */ = {
 			isa = XCBuildConfiguration;
 			buildSettings = {
 				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
 				ASSETCATALOG_COMPILER_GLOBAL_ACCENT_COLOR_NAME = AccentColor;
+				CODE_SIGN_ENTITLEMENTS = TexasWaterApp/TexasWater.entitlements;
 				CODE_SIGN_IDENTITY = "iPhone Developer";
 				CODE_SIGN_STYLE = Automatic;
 				CURRENT_PROJECT_VERSION = 1;
@@ -426,6 +582,7 @@
 			buildSettings = {
 				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
 				ASSETCATALOG_COMPILER_GLOBAL_ACCENT_COLOR_NAME = AccentColor;
+				CODE_SIGN_ENTITLEMENTS = TexasWaterApp/TexasWater.entitlements;
 				CODE_SIGN_IDENTITY = "iPhone Developer";
 				CODE_SIGN_STYLE = Automatic;
 				CURRENT_PROJECT_VERSION = 1;
@@ -472,6 +629,15 @@
 			defaultConfigurationIsVisible = 0;
 			defaultConfigurationName = Debug;
 		};
+		DD289F2498F348D62DE0E76C /* Build configuration list for PBXNativeTarget "TexasWaterWidget" */ = {
+			isa = XCConfigurationList;
+			buildConfigurations = (
+				2597B7C17669A339F5BEA059 /* Debug */,
+				73F4BB72339D08937D38F49C /* Release */,
+			);
+			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Debug;
+		};
 /* End XCConfigurationList section */
 
 /* Begin XCLocalSwiftPackageReference section */
@@ -483,6 +649,10 @@
 
 /* Begin XCSwiftPackageProductDependency section */
 		E0BD2BE9EB5BDF7D18125273 /* TexasWaterCore */ = {
+			isa = XCSwiftPackageProductDependency;
+			productName = TexasWaterCore;
+		};
+		ED3414E196B2423559F10374 /* TexasWaterCore */ = {
 			isa = XCSwiftPackageProductDependency;
 			productName = TexasWaterCore;
 		};

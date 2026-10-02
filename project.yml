@@ -15,8 +15,13 @@ targets:
     productName: Texas Water
     sources:
       - TexasWaterApp
+      - Shared
     dependencies:
       - package: TexasWaterCore
+      - target: TexasWaterWidget
+        embed: true
+    entitlements:
+      path: TexasWaterApp/TexasWater.entitlements
     settings:
       base:
         PRODUCT_BUNDLE_IDENTIFIER: com.ryanshores.TexasWater
@@ -39,3 +44,31 @@ targets:
         INFOPLIST_KEY_TEXAS_WATER_API_BASE_URL: ""
     scheme:
       testTargets: []
+  TexasWaterWidget:
+    type: app-extension
+    platform: iOS
+    productName: Texas Water Widget
+    sources:
+      - TexasWaterWidget
+      - Shared
+    dependencies:
+      - package: TexasWaterCore
+    entitlements:
+      path: TexasWaterWidget/TexasWaterWidget.entitlements
+    info:
+      path: TexasWaterWidget/Info.plist
+      properties:
+        CFBundleDisplayName: Texas Water
+        NSExtension:
+          NSExtensionPointIdentifier: com.apple.widgetkit-extension
+    settings:
+      base:
+        PRODUCT_BUNDLE_IDENTIFIER: com.ryanshores.TexasWater.Widget
+        PRODUCT_NAME: Texas Water Widget
+        SWIFT_VERSION: "6.0"
+        TARGETED_DEVICE_FAMILY: "1,2"
+        APPLICATION_EXTENSION_API_ONLY: YES
+        CODE_SIGN_STYLE: Automatic
+        DEVELOPMENT_TEAM: 77H7V8G86J
+        CURRENT_PROJECT_VERSION: 1
+        MARKETING_VERSION: 1.0.0

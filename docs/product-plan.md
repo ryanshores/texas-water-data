@@ -94,7 +94,7 @@ MapKit, SwiftData, WidgetKit, App Intents, and BackgroundTasks.
 - Search, filtering, detail charts, and map. **Implemented.**
 - Backend ingestion, normalized API, offline cache, and freshness states.
   **Implemented locally; production deployment and history backfill remain.**
-- Small and medium widgets.
+- Small and medium widgets. **Implemented; App Group provisioning remains.**
 - Accessibility, TestFlight, and source attribution.
 
 ### Phase 1.1 — alerts and polish

@@ -1,9 +1,12 @@
 import { env } from "cloudflare:test";
 import { beforeEach, describe, expect, it } from "vitest";
-import { readDashboard } from "../src/database";
+import type { NormalizedReservoir } from "../src/normalize";
+import { readDashboard, upsertCurrentConditions } from "../src/database";
 
 describe("dashboard queries", () => {
   beforeEach(async () => {
+    await env.DB.prepare("DROP TABLE IF EXISTS observations").run();
+    await env.DB.prepare("DROP TABLE IF EXISTS reservoirs").run();
     await env.DB.prepare(`
       CREATE TABLE reservoirs (
         id TEXT PRIMARY KEY,
@@ -38,27 +41,8 @@ describe("dashboard queries", () => {
   });
 
   it("calculates comparable changes from daily observations", async () => {
-    await env.DB.prepare(`
-      INSERT INTO reservoirs (
-        id, slug, short_name, full_name, latitude, longitude, basin, region,
-        is_water_supply, is_flood_control, conservation_pool_elevation, updated_at
-      ) VALUES ('travis', 'travis', 'Travis', 'Lake Travis', 30.4, -97.9,
-                'Colorado', 'Lower Colorado', 1, 0, 681, '2026-10-01')
-    `).run();
-    await env.DB.batch([
-      env.DB.prepare(`
-        INSERT INTO observations (
-          reservoir_id, date, percent_full, conservation_storage,
-          conservation_capacity, ingested_at
-        ) VALUES ('travis', '2026-09-24', 60, 600, 1000, '2026-09-24')
-      `),
-      env.DB.prepare(`
-        INSERT INTO observations (
-          reservoir_id, date, percent_full, conservation_storage,
-          conservation_capacity, ingested_at
-        ) VALUES ('travis', '2026-10-01', 65, 650, 1000, '2026-10-01')
-      `),
-    ]);
+    await upsertCurrentConditions(env.DB, [reservoir("2026-09-24", 60)]);
+    await upsertCurrentConditions(env.DB, [reservoir("2026-10-01", 65)]);
 
     const dashboard = await readDashboard(env.DB);
 
@@ -67,4 +51,39 @@ describe("dashboard queries", () => {
     expect(dashboard.reservoirs[0]?.trend.sevenDays).toBe(5);
     expect(dashboard.reservoirs[0]?.trend.storageSevenDays).toBe(50);
   });
+
+  it("does not compare a stale or null observation to a trend window", async () => {
+    await upsertCurrentConditions(env.DB, [reservoir("2026-09-10", 45)]);
+    await upsertCurrentConditions(env.DB, [reservoir("2026-09-24", null)]);
+    await upsertCurrentConditions(env.DB, [reservoir("2026-10-01", 65)]);
+
+    const dashboard = await readDashboard(env.DB);
+
+    expect(dashboard.reservoirs[0]?.trend.sevenDays).toBeNull();
+    expect(dashboard.reservoirs[0]?.trend.storageSevenDays).toBeNull();
+  });
 });
+
+function reservoir(observedAt: string, percentFull: number | null): NormalizedReservoir {
+  return {
+    id: "travis",
+    slug: "travis",
+    shortName: "Travis",
+    fullName: "Lake Travis",
+    observedAt,
+    latitude: 30.4,
+    longitude: -97.9,
+    basin: "Colorado",
+    region: "Lower Colorado",
+    isWaterSupply: true,
+    isFloodControl: false,
+    percentFull,
+    elevation: null,
+    surfaceArea: null,
+    reservoirStorage: null,
+    conservationStorage: percentFull === null ? null : percentFull * 10,
+    conservationCapacity: 1000,
+    conservationPoolElevation: 681,
+    deadPoolCapacity: null,
+  };
+}

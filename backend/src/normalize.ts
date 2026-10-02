@@ -68,6 +68,19 @@ export function slugify(value: string): string {
     .replace(/^-+|-+$/g, "");
 }
 
+export function extractOfficialSlugMap(html: string): Map<string, string> {
+  const links = html.matchAll(
+    /<a\s+[^>]*href=["']\/reservoirs\/individual\/([^"'?#/]+)["'][^>]*>([^<]+)<\/a>/gi,
+  );
+  const slugs = new Map<string, string>();
+  for (const link of links) {
+    const slug = link[1];
+    const name = link[2];
+    if (slug && name) slugs.set(slugify(decodeHTMLEntities(name)), slug);
+  }
+  return slugs;
+}
+
 function displayTag(tag: string | undefined): string | null {
   if (!tag) return null;
   return tag
@@ -87,4 +100,14 @@ function stringValue(value: unknown): string | null {
 
 function numberValue(value: unknown): number | null {
   return typeof value === "number" && Number.isFinite(value) ? value : null;
+}
+
+function decodeHTMLEntities(value: string): string {
+  return value
+    .replaceAll("&#39;", "'")
+    .replaceAll("&apos;", "'")
+    .replaceAll("&quot;", '"')
+    .replaceAll("&amp;", "&")
+    .replaceAll("&lt;", "<")
+    .replaceAll("&gt;", ">");
 }

@@ -30,6 +30,16 @@ public enum TWDBClientError: Error, LocalizedError {
     }
 }
 
+public struct ReservoirHistoryLink: Equatable, Sendable {
+    public let name: String
+    public let slug: String
+
+    public init(name: String, slug: String) {
+        self.name = name
+        self.slug = slug
+    }
+}
+
 public struct TWDBClient: Sendable {
     private static let session: URLSession = {
         let configuration = URLSessionConfiguration.ephemeral
@@ -55,22 +65,36 @@ public struct TWDBClient: Sendable {
     }
 
     public func fetchHistoricalSlugs() async throws -> [String] {
+        try await fetchHistoricalLinks().map(\.slug)
+    }
+
+    public func fetchHistoricalLinks() async throws -> [ReservoirHistoryLink] {
         let responseData = try await data(from: TWDBEndpoint.statewidePage)
         guard let html = String(data: responseData, encoding: .utf8) else {
             throw TWDBClientError.invalidText(TWDBEndpoint.statewidePage)
         }
-        return Self.extractHistoricalSlugs(from: html)
+        return Self.extractHistoricalLinks(from: html)
     }
 
     public static func extractHistoricalSlugs(from html: String) -> [String] {
-        let pattern = #"/reservoirs/individual/([^\"?#/]+)"#
+        Array(Set(extractHistoricalLinks(from: html).map(\.slug))).sorted()
+    }
+
+    public static func extractHistoricalLinks(from html: String) -> [ReservoirHistoryLink] {
+        let pattern = #"<a\s+[^>]*href=[\"']/reservoirs/individual/([^\"'?#/]+)[\"'][^>]*>([^<]+)</a>"#
         guard let expression = try? NSRegularExpression(pattern: pattern) else { return [] }
         let range = NSRange(html.startIndex..., in: html)
-        let slugs = expression.matches(in: html, range: range).compactMap { match -> String? in
-            guard let matchRange = Range(match.range(at: 1), in: html) else { return nil }
-            return String(html[matchRange])
+        let links = expression.matches(in: html, range: range).compactMap { match -> ReservoirHistoryLink? in
+            guard let slugRange = Range(match.range(at: 1), in: html),
+                  let nameRange = Range(match.range(at: 2), in: html) else { return nil }
+            return ReservoirHistoryLink(
+                name: decodeHTMLEntities(String(html[nameRange])),
+                slug: String(html[slugRange])
+            )
         }
-        return Array(Set(slugs)).sorted()
+        return Dictionary(grouping: links, by: \.slug)
+            .compactMap { $0.value.first }
+            .sorted { $0.slug < $1.slug }
     }
 
     private func data(from url: URL) async throws -> Data {
@@ -102,5 +126,15 @@ public struct TWDBClient: Sendable {
             try await Task.sleep(nanoseconds: delayNanoseconds)
         }
         throw lastError ?? TWDBClientError.nonHTTPResponse
+    }
+
+    private static func decodeHTMLEntities(_ value: String) -> String {
+        value
+            .replacingOccurrences(of: "&#39;", with: "'")
+            .replacingOccurrences(of: "&apos;", with: "'")
+            .replacingOccurrences(of: "&quot;", with: "\"")
+            .replacingOccurrences(of: "&amp;", with: "&")
+            .replacingOccurrences(of: "&lt;", with: "<")
+            .replacingOccurrences(of: "&gt;", with: ">")
     }
 }
