@@ -8,7 +8,8 @@
     {
       "binding": "DB",
       "database_name": "texas-water",
-      "migrations_dir": "migrations"
+      "migrations_dir": "migrations",
+      "database_id": "df074080-e571-4536-a261-c26583d3cfea"
     }
   ],
   "triggers": {
