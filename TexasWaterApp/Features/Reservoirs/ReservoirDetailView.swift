@@ -95,7 +95,7 @@ struct ReservoirDetailView: View {
                         )
                         .foregroundStyle(
                             LinearGradient(
-                                colors: [.waterBlue.opacity(0.35), .waterBlue.opacity(0.03)],
+                                colors: [Color.waterBlue.opacity(0.35), Color.waterBlue.opacity(0.03)],
                                 startPoint: .top,
                                 endPoint: .bottom
                             )
@@ -104,7 +104,7 @@ struct ReservoirDetailView: View {
                             x: .value("Date", observation.date),
                             y: .value("Percent full", percentFull)
                         )
-                        .foregroundStyle(.waterBlue)
+                        .foregroundStyle(Color.waterBlue)
                         .lineStyle(StrokeStyle(lineWidth: 2.5))
                     }
                 }
@@ -185,7 +185,7 @@ private struct MetricCard: View {
 
     var body: some View {
         VStack(alignment: .leading, spacing: 8) {
-            Image(systemName: icon).foregroundStyle(.waterBlue).accessibilityHidden(true)
+            Image(systemName: icon).foregroundStyle(Color.waterBlue).accessibilityHidden(true)
             Text(value).font(.headline).lineLimit(2).minimumScaleFactor(0.75)
             Text(title).font(.caption).foregroundStyle(.secondary)
         }

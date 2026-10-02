@@ -44,7 +44,7 @@ struct SummaryHeroCard: View {
         .padding(20)
         .background(
             LinearGradient(
-                colors: [.waterBlue, Color(red: 0.03, green: 0.25, blue: 0.52)],
+                colors: [Color.waterBlue, Color(red: 0.03, green: 0.25, blue: 0.52)],
                 startPoint: .topLeading,
                 endPoint: .bottomTrailing
             ),

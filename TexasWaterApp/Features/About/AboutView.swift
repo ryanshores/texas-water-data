@@ -8,7 +8,7 @@ struct AboutView: View {
                     VStack(alignment: .leading, spacing: 12) {
                         Label("Texas Water", systemImage: "water.waves")
                             .font(.title2.bold())
-                            .foregroundStyle(.waterBlue)
+                            .foregroundStyle(Color.waterBlue)
                         Text("A quick, accessible view of reservoir conditions across Texas.")
                             .foregroundStyle(.secondary)
                     }

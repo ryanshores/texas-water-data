@@ -27,7 +27,7 @@ final class ReservoirDataStore: ObservableObject {
 
     init(defaults: UserDefaults? = nil) {
         self.defaults = defaults ?? SharedWaterData.defaults
-        favoriteIDs = Set(defaults.stringArray(forKey: favoritesKey) ?? [])
+        favoriteIDs = Set(self.defaults.stringArray(forKey: favoritesKey) ?? [])
         apiClient = AppEnvironment.backendURL.map(TexasWaterAPIClient.init(baseURL:))
     }
 

@@ -17,7 +17,7 @@ struct ContentView: View {
             AboutView()
                 .tabItem { Label("About", systemImage: "info.circle") }
         }
-        .tint(.waterBlue)
+        .tint(Color.waterBlue)
         .environmentObject(store)
         .task { await store.load() }
     }
