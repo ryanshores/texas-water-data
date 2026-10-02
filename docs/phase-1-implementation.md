@@ -35,8 +35,10 @@ response and falls back automatically if the service is empty or unavailable.
 
 ## Remaining Phase 1 release work
 
-- Create the production D1 database and deploy the Worker under the owner's
-  Cloudflare account.
+- Apply the pending remote D1 migrations and deploy the Worker under the
+  owner's Cloudflare account. The production `texas-water` database has been
+  created and bound in the Worker configuration, but it contains no applied
+  migrations and no Worker deployment yet.
 - Backfill historical observations so movers are populated immediately; until
   then they accumulate as scheduled daily observations arrive, while detail
   charts continue to use the official TWDB CSV fallback.
