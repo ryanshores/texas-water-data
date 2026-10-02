@@ -3,15 +3,19 @@
 Texas Water is a native iOS project for quickly understanding Texas reservoir
 conditions: what is full, what is low, and what is changing fastest.
 
-The project is currently through **Phase 0**. It includes:
+The project now has a working **Phase 1 reservoir MVP foundation**. It includes:
 
-- a generated SwiftUI iOS application project;
+- a generated SwiftUI iOS app with Today, reservoir browsing, detail charts,
+  favorites, a map, and small/medium home-screen widgets;
 - a reusable `TexasWaterCore` Swift package;
 - typed decoders for TWDB current-condition JSON and historical CSV;
 - change calculations that guard against stale data and capacity revisions;
+- an offline dashboard/history cache with direct-TWDB fallback;
+- a scheduled Cloudflare Worker and normalized D1 API for compact mobile reads;
+- strict Worker-runtime tests and CI for both Swift and TypeScript; and
 - a live data-proof command that inventories and validates the official feeds;
-- deterministic XCTest parser and analytics tests; and
-- the product plan and data-source inventory under `docs/`.
+- deterministic parser and analytics tests; and
+- the product plan, data inventory, and Phase 1 status under `docs/`.
 
 ## Open the app
 
@@ -33,6 +37,17 @@ swift test --package-path Packages/TexasWaterCore
 The tests require XCTest from a full Xcode toolchain. Apple's standalone
 Command Line Tools can build the package and proof executable but may not ship
 the XCTest module.
+
+## Test the backend
+
+```sh
+cd backend
+npm ci
+npm run check
+```
+
+See `backend/README.md` for local D1 setup and the account-owner deployment
+steps. The app does not require the backend during development.
 
 ## Run the live Phase 0 proof
 

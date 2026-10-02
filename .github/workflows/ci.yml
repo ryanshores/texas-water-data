@@ -9,9 +9,31 @@ permissions:
   contents: read
 
 jobs:
+  backend-tests:
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: backend
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 24
+          cache: npm
+          cache-dependency-path: backend/package-lock.json
+      - name: Install backend dependencies
+        run: npm ci
+      - name: Check Worker, types, and queries
+        run: npm run check
+
   core-tests:
     runs-on: macos-15
     steps:
       - uses: actions/checkout@v4
       - name: Test TexasWaterCore
         run: swift test --package-path Packages/TexasWaterCore
+      - name: Build iOS app and widget
+        run: >-
+          xcodebuild -project TexasWater.xcodeproj -scheme TexasWater
+          -sdk iphonesimulator -destination 'generic/platform=iOS Simulator'
+          CODE_SIGNING_ALLOWED=NO build

@@ -50,8 +50,48 @@ final class TexasWaterCoreTests: XCTestCase {
         <a href="/reservoirs/individual/travis">Travis</a>
         <a href="/reservoirs/individual/travis">Travis again</a>
         <a href="/reservoirs/individual/buchanan">Buchanan</a>
+        <a href="/reservoirs/individual/lake-o-the-pines">Lake O&#39; the Pines</a>
         """
-        XCTAssertEqual(TWDBClient.extractHistoricalSlugs(from: html), ["buchanan", "travis"])
+        XCTAssertEqual(
+            TWDBClient.extractHistoricalSlugs(from: html),
+            ["buchanan", "lake-o-the-pines", "travis"]
+        )
+        XCTAssertEqual(
+            TWDBClient.extractHistoricalLinks(from: html).first { $0.slug == "lake-o-the-pines" }?.name,
+            "Lake O' the Pines"
+        )
+    }
+
+    func testBuildsDashboardAndClassifiesReservoirs() throws {
+        let data = try fixture(named: "recent-conditions", extension: "json")
+        let decoded = try JSONDecoder().decode([String: ReservoirSnapshot].self, from: data)
+        let dashboard = ReservoirCatalogBuilder.build(from: decoded)
+        let travis = try XCTUnwrap(dashboard.reservoirs.first)
+
+        XCTAssertEqual(dashboard.statewidePercentFull ?? 0, 89.2, accuracy: 0.01)
+        XCTAssertEqual(travis.slug, "travis")
+        XCTAssertEqual(travis.status, .normal)
+        XCTAssertEqual(travis.heightFromConservationPool ?? 0, -6.48, accuracy: 0.001)
+    }
+
+    func testDashboardUsesOfficialHistorySlugMapping() throws {
+        let data = try fixture(named: "recent-conditions", extension: "json")
+        let decoded = try JSONDecoder().decode([String: ReservoirSnapshot].self, from: data)
+        let dashboard = ReservoirCatalogBuilder.build(
+            from: decoded,
+            historySlugsByName: ["Travis": "official-travis-slug"]
+        )
+
+        XCTAssertEqual(dashboard.reservoirs.first?.slug, "official-travis-slug")
+    }
+
+    func testStatusThresholds() {
+        XCTAssertEqual(ReservoirStatus.classify(percentFull: 100), .nearFull)
+        XCTAssertEqual(ReservoirStatus.classify(percentFull: 95), .nearFull)
+        XCTAssertEqual(ReservoirStatus.classify(percentFull: 25), .normal)
+        XCTAssertEqual(ReservoirStatus.classify(percentFull: 24.9), .low)
+        XCTAssertEqual(ReservoirStatus.classify(percentFull: 9.9), .critical)
+        XCTAssertEqual(ReservoirStatus.classify(percentFull: nil), .unavailable)
     }
 
     private func fixture(named name: String, extension fileExtension: String) throws -> Data {
