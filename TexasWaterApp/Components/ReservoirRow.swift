@@ -4,6 +4,7 @@ import TexasWaterCore
 struct ReservoirRow: View {
     let reservoir: ReservoirSummary
     var showsFavorite = true
+    var capacityContext: ReservoirCapacityContext? = nil
 
     @EnvironmentObject private var store: ReservoirDataStore
 
@@ -34,6 +35,11 @@ struct ReservoirRow: View {
                     .font(.caption)
                     .foregroundStyle(.secondary)
                     .lineLimit(1)
+                if let capacityContext {
+                    Text("\(capacityContext.tier(for: reservoir).rawValue) capacity")
+                        .font(.caption2.weight(.medium))
+                        .foregroundStyle(Color.waterBlue)
+                }
             }
 
             Spacer(minLength: 8)

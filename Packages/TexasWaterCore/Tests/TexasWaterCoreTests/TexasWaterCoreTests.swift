@@ -94,6 +94,27 @@ final class TexasWaterCoreTests: XCTestCase {
         XCTAssertEqual(ReservoirStatus.classify(percentFull: nil), .unavailable)
     }
 
+    func testCapacityContextAndBasinSummariesUsePairedValues() {
+        let small = summary(id: "small", basin: "Colorado", storage: 10, capacity: 100)
+        let medium = summary(id: "medium", basin: "Colorado", storage: 200, capacity: 400)
+        let large = summary(id: "large", basin: "Brazos", storage: 900, capacity: 1_000)
+        let incomplete = summary(id: "incomplete", basin: "Brazos", storage: nil, capacity: 2_000)
+        let reservoirs = [small, medium, large, incomplete]
+
+        let context = ReservoirAnalytics.capacityContext(for: reservoirs)
+        let basins = ReservoirAnalytics.basinSummaries(for: reservoirs)
+
+        XCTAssertEqual(context.tier(for: small), .small)
+        XCTAssertEqual(context.tier(for: large), .large)
+        XCTAssertTrue(context.isMajor(large))
+        XCTAssertEqual(context.statewideShare(for: large) ?? 0, 1000 / 3500 * 100, accuracy: 0.001)
+        guard let brazos = basins.first(where: { $0.name == "Brazos" }) else {
+            return XCTFail("Expected a Brazos basin summary")
+        }
+        XCTAssertEqual(brazos.percentFull ?? 0, 90, accuracy: 0.001)
+        XCTAssertEqual(brazos.includedReservoirCount, 1)
+    }
+
     private func fixture(named name: String, extension fileExtension: String) throws -> Data {
         let url = try XCTUnwrap(
             Bundle.module.url(forResource: name, withExtension: fileExtension, subdirectory: "Fixtures")
@@ -111,6 +132,18 @@ final class TexasWaterCoreTests: XCTestCase {
             percentFull: percent,
             conservationCapacity: capacity,
             deadPoolCapacity: nil
+        )
+    }
+
+    private func summary(id: String, basin: String, storage: Double?, capacity: Double?) -> ReservoirSummary {
+        ReservoirSummary(
+            id: id, slug: id, shortName: id, fullName: id, observedAt: "2026-10-02",
+            latitude: 30, longitude: -97, basin: basin, region: nil,
+            isWaterSupply: true, isFloodControl: false,
+            percentFull: storage.flatMap { value in capacity.map { value / $0 * 100 } },
+            elevation: nil, surfaceArea: nil, reservoirStorage: nil,
+            conservationStorage: storage, conservationCapacity: capacity,
+            conservationPoolElevation: nil
         )
     }
 }

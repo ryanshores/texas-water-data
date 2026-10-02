@@ -14,6 +14,9 @@ struct ContentView: View {
             ReservoirMapView()
                 .tabItem { Label("Map", systemImage: "map") }
 
+            BasinListView()
+                .tabItem { Label("Basins", systemImage: "water.waves") }
+
             AboutView()
                 .tabItem { Label("About", systemImage: "info.circle") }
         }

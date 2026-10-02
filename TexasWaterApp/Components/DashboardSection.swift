@@ -5,6 +5,7 @@ struct DashboardSection: View {
     let title: String
     let subtitle: String
     let reservoirs: [ReservoirSummary]
+    var capacityContext: ReservoirCapacityContext? = nil
     var emptyMessage: String? = nil
 
     var body: some View {
@@ -27,7 +28,7 @@ struct DashboardSection: View {
                         NavigationLink {
                             ReservoirDetailView(reservoir: reservoir)
                         } label: {
-                            ReservoirRow(reservoir: reservoir)
+                            ReservoirRow(reservoir: reservoir, capacityContext: capacityContext)
                                 .padding(.horizontal, 14)
                                 .padding(.vertical, 7)
                         }

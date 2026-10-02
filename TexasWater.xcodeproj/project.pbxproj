@@ -27,6 +27,7 @@
 		C0C8C58A8EF713ABA2E75E06 /* WaterWidgetCache.swift in Sources */ = {isa = PBXBuildFile; fileRef = 61167902E5E3BA12ED34E6D7 /* WaterWidgetCache.swift */; };
 		C0D050DA293D46BEA1E279EB /* SummaryHeroCard.swift in Sources */ = {isa = PBXBuildFile; fileRef = F556DEA25DD9BCCE2ED09191 /* SummaryHeroCard.swift */; };
 		D81758A706C533558BE98E86 /* TodayView.swift in Sources */ = {isa = PBXBuildFile; fileRef = E35308719F123C32DC78621B /* TodayView.swift */; };
+		EAFB21740CA18C0419B3E107 /* BasinListView.swift in Sources */ = {isa = PBXBuildFile; fileRef = ECF799960593C82FFF201FB6 /* BasinListView.swift */; };
 		EF0887DADEA4D4F9A0BB0D86 /* AboutView.swift in Sources */ = {isa = PBXBuildFile; fileRef = AC5867C66D98CC91F235BA62 /* AboutView.swift */; };
 /* End PBXBuildFile section */
 
@@ -76,6 +77,7 @@
 		CB5F60F64EB5650E09C86242 /* AppEnvironment.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AppEnvironment.swift; sourceTree = "<group>"; };
 		E35308719F123C32DC78621B /* TodayView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TodayView.swift; sourceTree = "<group>"; };
 		EC7166B9359A9CA532EAE532 /* TexasWaterWidget.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TexasWaterWidget.swift; sourceTree = "<group>"; };
+		ECF799960593C82FFF201FB6 /* BasinListView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = BasinListView.swift; sourceTree = "<group>"; };
 		F4AB83A975A728428F1F21ED /* ReservoirMapView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ReservoirMapView.swift; sourceTree = "<group>"; };
 		F556DEA25DD9BCCE2ED09191 /* SummaryHeroCard.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SummaryHeroCard.swift; sourceTree = "<group>"; };
 		F57048B0A4EADE115244C341 /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist; path = Info.plist; sourceTree = "<group>"; };
@@ -164,6 +166,14 @@
 			path = Today;
 			sourceTree = "<group>";
 		};
+		75CE96E7E12FD48AD75198F5 /* Basins */ = {
+			isa = PBXGroup;
+			children = (
+				ECF799960593C82FFF201FB6 /* BasinListView.swift */,
+			);
+			path = Basins;
+			sourceTree = "<group>";
+		};
 		760A10728A42F449D1BCF5B3 /* Map */ = {
 			isa = PBXGroup;
 			children = (
@@ -184,6 +194,7 @@
 			isa = PBXGroup;
 			children = (
 				6272B8E131FBB2AAFB5D936F /* About */,
+				75CE96E7E12FD48AD75198F5 /* Basins */,
 				760A10728A42F449D1BCF5B3 /* Map */,
 				10CF7FF8BC02F5E717900DDF /* Reservoirs */,
 				6BA9098E195490C680BB092A /* Today */,
@@ -356,6 +367,7 @@
 			files = (
 				EF0887DADEA4D4F9A0BB0D86 /* AboutView.swift in Sources */,
 				0551E5E7043A82AFD06E9CDC /* AppEnvironment.swift in Sources */,
+				EAFB21740CA18C0419B3E107 /* BasinListView.swift in Sources */,
 				1B348E4B9573FFF797C70089 /* ContentView.swift in Sources */,
 				969A6E800C1A83BD1FCBB8C0 /* DashboardCache.swift in Sources */,
 				5EEE9D215138E32A82058369 /* DashboardSection.swift in Sources */,

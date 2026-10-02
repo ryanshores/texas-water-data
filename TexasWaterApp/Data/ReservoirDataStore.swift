@@ -32,6 +32,8 @@ final class ReservoirDataStore: ObservableObject {
     }
 
     var reservoirs: [ReservoirSummary] { dashboard?.reservoirs ?? [] }
+    var capacityContext: ReservoirCapacityContext { dashboard?.capacityContext ?? ReservoirAnalytics.capacityContext(for: []) }
+    var basinSummaries: [BasinSummary] { dashboard?.basinSummaries ?? [] }
     var favorites: [ReservoirSummary] { reservoirs.filter { favoriteIDs.contains($0.id) } }
     var hasTrendData: Bool { reservoirs.contains { $0.trend.sevenDays != nil } }
 
@@ -57,6 +59,10 @@ final class ReservoirDataStore: ObservableObject {
         reservoirs
             .filter { $0.status == .nearFull }
             .sorted { ($0.percentFull ?? 0) > ($1.percentFull ?? 0) }
+    }
+
+    func majorOnly(_ reservoirs: [ReservoirSummary], enabled: Bool) -> [ReservoirSummary] {
+        enabled ? reservoirs.filter(capacityContext.isMajor) : reservoirs
     }
 
     func load() async {
