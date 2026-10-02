@@ -91,7 +91,8 @@ struct ReservoirDetailView: View {
                     if let percentFull = observation.percentFull {
                         AreaMark(
                             x: .value("Date", observation.date),
-                            y: .value("Percent full", percentFull)
+                            yStart: .value("Chart floor", chartDomain.lowerBound),
+                            yEnd: .value("Percent full", percentFull)
                         )
                         .foregroundStyle(
                             LinearGradient(
