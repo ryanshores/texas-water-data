@@ -19,13 +19,13 @@ struct TexasWaterWidgetProvider: TimelineProvider {
         )
     }
 
-    func getSnapshot(in context: Context, completion: @escaping (TexasWaterWidgetEntry) -> Void) {
+    func getSnapshot(in context: Context, completion: @escaping @Sendable (TexasWaterWidgetEntry) -> Void) {
         Task { @MainActor in
             completion(await entry())
         }
     }
 
-    func getTimeline(in context: Context, completion: @escaping (Timeline<TexasWaterWidgetEntry>) -> Void) {
+    func getTimeline(in context: Context, completion: @escaping @Sendable (Timeline<TexasWaterWidgetEntry>) -> Void) {
         Task { @MainActor in
             let snapshot = await entry()
             let nextUpdate = Calendar.current.date(byAdding: .hour, value: 2, to: snapshot.date) ?? snapshot.date
