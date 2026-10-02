@@ -17,13 +17,13 @@ enum SharedWaterData {
     }
 
     static func loadDashboard(fileManager: FileManager = .default) -> ReservoirDashboard? {
-        let url = cacheDirectory(fileManager: fileManager).appending(path: "dashboard.json")
+        let url = cacheDirectory(fileManager: fileManager).appending(path: "widget-dashboard.json")
         return try? JSONDecoder().decode(ReservoirDashboard.self, from: Data(contentsOf: url))
     }
 
     static func saveDashboard(_ dashboard: ReservoirDashboard, fileManager: FileManager = .default) {
         let directory = cacheDirectory(fileManager: fileManager)
-        let url = directory.appending(path: "dashboard.json")
+        let url = directory.appending(path: "widget-dashboard.json")
         do {
             try fileManager.createDirectory(at: directory, withIntermediateDirectories: true)
             try JSONEncoder().encode(dashboard).write(to: url, options: .atomic)

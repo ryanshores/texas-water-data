@@ -37,6 +37,17 @@ interface HistoryRow {
   dead_pool_capacity: number | null;
 }
 
+interface HistoryResponse {
+  date: string;
+  waterLevel: number | null;
+  surfaceArea: number | null;
+  reservoirStorage: number | null;
+  conservationStorage: number | null;
+  percentFull: number | null;
+  conservationCapacity: number | null;
+  deadPoolCapacity: number | null;
+}
+
 export async function upsertCurrentConditions(db: D1Database, reservoirs: NormalizedReservoir[]): Promise<void> {
   const ingestedAt = new Date().toISOString();
   const payload = JSON.stringify(reservoirs);
@@ -44,7 +55,7 @@ export async function upsertCurrentConditions(db: D1Database, reservoirs: Normal
     db.prepare(`
       INSERT INTO reservoirs (
         id, slug, short_name, full_name, latitude, longitude, basin, region,
-        is_water_supply, is_flood_control, conservation_pool_elevation, updated_at
+        is_water_supply, is_flood_control, conservation_pool_elevation, is_active, updated_at
       )
       SELECT
         json_extract(value, '$.id'),
@@ -58,6 +69,7 @@ export async function upsertCurrentConditions(db: D1Database, reservoirs: Normal
         json_extract(value, '$.isWaterSupply'),
         json_extract(value, '$.isFloodControl'),
         json_extract(value, '$.conservationPoolElevation'),
+        1,
         ?
       FROM json_each(?)
       WHERE true
@@ -72,8 +84,17 @@ export async function upsertCurrentConditions(db: D1Database, reservoirs: Normal
         is_water_supply = excluded.is_water_supply,
         is_flood_control = excluded.is_flood_control,
         conservation_pool_elevation = excluded.conservation_pool_elevation,
+        is_active = 1,
         updated_at = excluded.updated_at
     `).bind(ingestedAt, payload),
+    db.prepare(`
+      UPDATE reservoirs
+      SET is_active = 0
+      WHERE id NOT IN (
+        SELECT json_extract(value, '$.id')
+        FROM json_each(?)
+      )
+    `).bind(payload),
     db.prepare(`
       INSERT INTO observations (
         reservoir_id, date, percent_full, elevation, surface_area, reservoir_storage,
@@ -122,6 +143,7 @@ export async function readDashboard(db: D1Database): Promise<{
       FROM reservoirs r
       JOIN latest l ON l.reservoir_id = r.id
       JOIN observations o ON o.reservoir_id = l.reservoir_id AND o.date = l.date
+      WHERE r.is_active = 1
     )
     SELECT c.*,
       CASE WHEN p1.conservation_capacity IS NULL OR c.conservation_capacity IS NULL
@@ -180,13 +202,15 @@ export async function readDashboard(db: D1Database): Promise<{
   `);
   const result = await query.all<DashboardRow>();
   const reservoirs = result.results.map(mapDashboardRow);
-  const totals = reservoirs.reduce(
-    (value, reservoir) => ({
-      storage: value.storage + (reservoir.conservationStorage ?? 0),
-      capacity: value.capacity + (reservoir.conservationCapacity ?? 0),
-    }),
-    { storage: 0, capacity: 0 },
-  );
+  const totals = reservoirs.reduce((value, reservoir) => {
+    if (reservoir.conservationStorage === null || reservoir.conservationCapacity === null) {
+      return value;
+    }
+    return {
+      storage: value.storage + reservoir.conservationStorage,
+      capacity: value.capacity + reservoir.conservationCapacity,
+    };
+  }, { storage: 0, capacity: 0 });
 
   return {
     generatedAt: new Date().toISOString(),
@@ -196,14 +220,19 @@ export async function readDashboard(db: D1Database): Promise<{
   };
 }
 
-export async function readHistory(db: D1Database, reservoirID: string, days: number): Promise<object[]> {
+export async function readHistory(db: D1Database, reservoirID: string, days: number): Promise<HistoryResponse[]> {
   const result = await db.prepare(`
     SELECT date, elevation, surface_area, reservoir_storage, conservation_storage,
            percent_full, conservation_capacity, dead_pool_capacity
     FROM observations
-    WHERE reservoir_id = ? AND date >= date('now', ?)
+    WHERE reservoir_id = ?
+      AND date >= (
+        SELECT date(MAX(date), ?)
+        FROM observations
+        WHERE reservoir_id = ?
+      )
     ORDER BY date ASC
-  `).bind(reservoirID, `-${days} days`).all<HistoryRow>();
+  `).bind(reservoirID, `-${days} days`, reservoirID).all<HistoryRow>();
 
   return result.results.map((row) => ({
     date: row.date,

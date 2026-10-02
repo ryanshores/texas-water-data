@@ -22,6 +22,18 @@ targets:
         embed: true
     entitlements:
       path: TexasWaterApp/TexasWater.entitlements
+      properties:
+        com.apple.security.application-groups:
+          - group.com.ryanshores.TexasWater
+    info:
+      path: TexasWaterApp/Info.plist
+      properties:
+        CFBundleShortVersionString: "$(MARKETING_VERSION)"
+        CFBundleVersion: "$(CURRENT_PROJECT_VERSION)"
+        CFBundleURLTypes:
+          - CFBundleURLName: com.ryanshores.TexasWater
+            CFBundleURLSchemes:
+              - texaswater
     settings:
       base:
         PRODUCT_BUNDLE_IDENTIFIER: com.ryanshores.TexasWater
@@ -55,10 +67,15 @@ targets:
       - package: TexasWaterCore
     entitlements:
       path: TexasWaterWidget/TexasWaterWidget.entitlements
+      properties:
+        com.apple.security.application-groups:
+          - group.com.ryanshores.TexasWater
     info:
       path: TexasWaterWidget/Info.plist
       properties:
         CFBundleDisplayName: Texas Water
+        CFBundleShortVersionString: "$(MARKETING_VERSION)"
+        CFBundleVersion: "$(CURRENT_PROJECT_VERSION)"
         NSExtension:
           NSExtensionPointIdentifier: com.apple.widgetkit-extension
     settings:

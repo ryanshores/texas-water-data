@@ -13,14 +13,20 @@ public enum ReservoirCatalogBuilder {
         }.sorted {
             $0.shortName.localizedCaseInsensitiveCompare($1.shortName) == .orderedAscending
         }
-        let storage = reservoirs.compactMap(\.conservationStorage).reduce(0, +)
-        let capacity = reservoirs.compactMap(\.conservationCapacity).reduce(0, +)
+        let statewideTotals = reservoirs.reduce(into: (storage: 0.0, capacity: 0.0)) { totals, reservoir in
+            guard let storage = reservoir.conservationStorage,
+                  let capacity = reservoir.conservationCapacity else { return }
+            totals.storage += storage
+            totals.capacity += capacity
+        }
         let sourceUpdatedAt = reservoirs.map(\.observedAt).max()
 
         return ReservoirDashboard(
             generatedAt: ISO8601DateFormatter().string(from: Date()),
             sourceUpdatedAt: sourceUpdatedAt,
-            statewidePercentFull: capacity > 0 ? storage / capacity * 100 : nil,
+            statewidePercentFull: statewideTotals.capacity > 0
+                ? statewideTotals.storage / statewideTotals.capacity * 100
+                : nil,
             reservoirs: reservoirs
         )
     }

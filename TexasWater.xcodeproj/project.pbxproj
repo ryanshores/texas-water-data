@@ -78,6 +78,7 @@
 		EC7166B9359A9CA532EAE532 /* TexasWaterWidget.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TexasWaterWidget.swift; sourceTree = "<group>"; };
 		F4AB83A975A728428F1F21ED /* ReservoirMapView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ReservoirMapView.swift; sourceTree = "<group>"; };
 		F556DEA25DD9BCCE2ED09191 /* SummaryHeroCard.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SummaryHeroCard.swift; sourceTree = "<group>"; };
+		F57048B0A4EADE115244C341 /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist; path = Info.plist; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -204,6 +205,7 @@
 			children = (
 				7C0A38CDEDD7E7DE677DF778 /* Assets.xcassets */,
 				9A2330395D4CF259EDA912E2 /* ContentView.swift */,
+				F57048B0A4EADE115244C341 /* Info.plist */,
 				7AD441C27CD2757019178FA3 /* TexasWater.entitlements */,
 				252335BE49976F8049BD4DC9 /* TexasWaterApp.swift */,
 				F99DA3C6694AC40B6D6AB4E1 /* App */,
@@ -501,6 +503,7 @@
 				CURRENT_PROJECT_VERSION = 1;
 				DEVELOPMENT_TEAM = 77H7V8G86J;
 				GENERATE_INFOPLIST_FILE = YES;
+				INFOPLIST_FILE = TexasWaterApp/Info.plist;
 				INFOPLIST_KEY_CFBundleDisplayName = "Texas Water";
 				INFOPLIST_KEY_CFBundleShortVersionString = "$(MARKETING_VERSION)";
 				INFOPLIST_KEY_CFBundleVersion = "$(CURRENT_PROJECT_VERSION)";
@@ -588,6 +591,7 @@
 				CURRENT_PROJECT_VERSION = 1;
 				DEVELOPMENT_TEAM = 77H7V8G86J;
 				GENERATE_INFOPLIST_FILE = YES;
+				INFOPLIST_FILE = TexasWaterApp/Info.plist;
 				INFOPLIST_KEY_CFBundleDisplayName = "Texas Water";
 				INFOPLIST_KEY_CFBundleShortVersionString = "$(MARKETING_VERSION)";
 				INFOPLIST_KEY_CFBundleVersion = "$(CURRENT_PROJECT_VERSION)";
