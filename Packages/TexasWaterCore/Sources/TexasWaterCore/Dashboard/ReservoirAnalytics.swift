@@ -53,8 +53,8 @@ public enum ReservoirAnalytics {
         }
         return ReservoirCapacityContext(
             statewideCapacity: capacities.reduce(0, +),
-            smallThreshold: percentile(capacities, fraction: 0.25),
-            majorThreshold: percentile(capacities, fraction: 0.75)
+            smallThreshold: lowerQuartileThreshold(capacities),
+            majorThreshold: upperQuartileThreshold(capacities)
         )
     }
 
@@ -78,8 +78,14 @@ public enum ReservoirAnalytics {
             .sorted { $0.conservationCapacity > $1.conservationCapacity }
     }
 
-    private static func percentile(_ values: [Double], fraction: Double) -> Double {
-        values[Int((Double(values.count - 1) * fraction).rounded())]
+    private static func lowerQuartileThreshold(_ values: [Double]) -> Double {
+        let memberCount = max(1, Int((Double(values.count) * 0.25).rounded(.up)))
+        return values[memberCount - 1]
+    }
+
+    private static func upperQuartileThreshold(_ values: [Double]) -> Double {
+        let memberCount = max(1, Int((Double(values.count) * 0.25).rounded(.up)))
+        return values[values.count - memberCount]
     }
 }
 

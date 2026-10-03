@@ -40,8 +40,10 @@ struct BasinDetailView: View {
         List {
             Section("Basin conditions") {
                 LabeledContent("Percent full", value: WaterFormatting.percent(basin.percentFull))
+                LabeledContent("Conservation storage", value: WaterFormatting.acreFeet(basin.conservationStorage))
                 LabeledContent("Conservation capacity", value: WaterFormatting.acreFeet(basin.conservationCapacity))
                 LabeledContent("Included reservoirs", value: "\(basin.includedReservoirCount) of \(basin.reservoirs.count)")
+                LabeledContent("Latest source update", value: basin.sourceUpdatedAt ?? "—")
             }
             Section("Largest reservoirs") {
                 ForEach(basin.reservoirs.prefix(5)) { reservoir in
@@ -50,10 +52,12 @@ struct BasinDetailView: View {
                     }
                 }
             }
-            Section("All reservoirs") {
-                ForEach(basin.reservoirs) { reservoir in
-                    NavigationLink { ReservoirDetailView(reservoir: reservoir) } label: {
-                        ReservoirRow(reservoir: reservoir, capacityContext: store.capacityContext)
+            if basin.reservoirs.count > 5 {
+                Section("Other reservoirs") {
+                    ForEach(Array(basin.reservoirs.dropFirst(5))) { reservoir in
+                        NavigationLink { ReservoirDetailView(reservoir: reservoir) } label: {
+                            ReservoirRow(reservoir: reservoir, capacityContext: store.capacityContext)
+                        }
                     }
                 }
             }
