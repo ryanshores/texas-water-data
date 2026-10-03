@@ -105,8 +105,8 @@ final class TexasWaterCoreTests: XCTestCase {
         let basins = ReservoirAnalytics.basinSummaries(for: reservoirs)
 
         XCTAssertEqual(context.tier(for: small), .small)
-        XCTAssertEqual(context.tier(for: large), .large)
-        XCTAssertTrue(context.isMajor(large))
+        XCTAssertEqual(context.tier(for: incomplete), .large)
+        XCTAssertTrue(context.isMajor(incomplete))
         XCTAssertFalse(context.isMajor(medium))
         XCTAssertEqual(context.statewideShare(for: large) ?? 0, 1000 / 3500 * 100, accuracy: 0.001)
         guard let brazos = basins.first(where: { $0.name == "Brazos" }) else {
