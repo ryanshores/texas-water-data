@@ -141,6 +141,16 @@ struct ReservoirDetailView: View {
                 MetricCard(title: "Storage", value: WaterFormatting.acreFeet(reservoir.reservoirStorage), icon: "cylinder")
                 MetricCard(title: "Surface area", value: WaterFormatting.acres(reservoir.surfaceArea), icon: "square.dashed")
                 MetricCard(title: "Capacity", value: WaterFormatting.acreFeet(reservoir.conservationCapacity), icon: "gauge.with.dots.needle.67percent")
+                MetricCard(
+                    title: "Statewide capacity share",
+                    value: WaterFormatting.percent(store.capacityContext.statewideShare(for: reservoir)),
+                    icon: "chart.pie"
+                )
+                MetricCard(
+                    title: "Capacity scale",
+                    value: store.capacityContext.tier(for: reservoir).rawValue,
+                    icon: "ruler"
+                )
                 MetricCard(title: "Basin", value: reservoir.basin ?? "—", icon: "map")
             }
         }

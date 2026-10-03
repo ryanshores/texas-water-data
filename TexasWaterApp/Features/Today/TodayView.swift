@@ -2,6 +2,7 @@ import SwiftUI
 
 struct TodayView: View {
     @EnvironmentObject private var store: ReservoirDataStore
+    @State private var majorOnly = false
 
     var body: some View {
         NavigationStack {
@@ -20,13 +21,21 @@ struct TodayView: View {
 
                             SummaryHeroCard(dashboard: dashboard, source: store.source)
 
+                            Picker("Ranking scope", selection: $majorOnly) {
+                                Text("All reservoirs").tag(false)
+                                Text("Major capacity").tag(true)
+                            }
+                            .pickerStyle(.segmented)
+                            .accessibilityHint("Major capacity means the largest quarter of reservoirs by conservation capacity.")
+
                             if store.favorites.isEmpty {
                                 favoritePrompt
                             } else {
                                 DashboardSection(
                                     title: "My reservoirs",
                                     subtitle: "The lakes you follow",
-                                    reservoirs: store.favorites
+                                    reservoirs: store.favorites,
+                                    capacityContext: store.capacityContext
                                 )
                             }
 
@@ -34,12 +43,14 @@ struct TodayView: View {
                                 DashboardSection(
                                     title: "Rising fastest",
                                     subtitle: "Largest seven-day gains",
-                                    reservoirs: store.rising
+                                    reservoirs: store.majorOnly(store.rising, enabled: majorOnly),
+                                    capacityContext: store.capacityContext
                                 )
                                 DashboardSection(
                                     title: "Falling fastest",
                                     subtitle: "Largest seven-day declines",
-                                    reservoirs: store.falling
+                                    reservoirs: store.majorOnly(store.falling, enabled: majorOnly),
+                                    capacityContext: store.capacityContext
                                 )
                             } else {
                                 DashboardSection(
@@ -53,14 +64,16 @@ struct TodayView: View {
                             DashboardSection(
                                 title: "Lowest reservoirs",
                                 subtitle: "Below 25% of conservation capacity",
-                                reservoirs: store.low,
+                                reservoirs: store.majorOnly(store.low, enabled: majorOnly),
+                                capacityContext: store.capacityContext,
                                 emptyMessage: "No low reservoirs"
                             )
 
                             DashboardSection(
                                 title: "Near full",
                                 subtitle: "At least 95% of conservation capacity",
-                                reservoirs: store.nearFull,
+                                reservoirs: store.majorOnly(store.nearFull, enabled: majorOnly),
+                                capacityContext: store.capacityContext,
                                 emptyMessage: "No reservoirs are near full"
                             )
                         }
