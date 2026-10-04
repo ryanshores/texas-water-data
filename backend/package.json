@@ -6,6 +6,7 @@
   "scripts": {
     "check": "wrangler types --check && tsc --noEmit && vitest run",
     "dev": "wrangler dev --local --test-scheduled",
+    "backfill:history": "node scripts/backfill-history.mjs",
     "test": "vitest run",
     "types": "wrangler types"
   },

@@ -35,13 +35,13 @@ response and falls back automatically if the service is empty or unavailable.
 
 ## Remaining Phase 1 release work
 
-- Apply the pending remote D1 migrations and deploy the Worker under the
-  owner's Cloudflare account. The production `texas-water` database has been
-  created and bound in the Worker configuration, but it contains no applied
-  migrations and no Worker deployment yet.
-- Backfill historical observations so movers are populated immediately; until
-  then they accumulate as scheduled daily observations arrive, while detail
-  charts continue to use the official TWDB CSV fallback.
+- The production `texas-water` D1 migrations have been applied and the Worker is
+  deployed at `https://texas-water-api.ryan-shores.workers.dev`. Verify `/health`
+  and `/v1/dashboard` after future deployments.
+- Backfill historical observations with `npm run backfill:history` and the
+  remote D1 commands documented in `backend/README.md`. Until this one-time
+  operation is run, movers accumulate as scheduled daily observations arrive,
+  while detail charts continue to use the official TWDB CSV fallback.
 - Enable the `group.com.ryanshores.TexasWater` App Group for both bundle IDs in
   the Apple Developer account so widget favorites and the app cache can share
   storage on a signed device.
