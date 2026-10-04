@@ -34,6 +34,7 @@ targets:
           - CFBundleURLName: com.ryanshores.TexasWater
             CFBundleURLSchemes:
               - texaswater
+        TEXAS_WATER_API_BASE_URL: "$(TEXAS_WATER_API_BASE_URL)"
     settings:
       base:
         PRODUCT_BUNDLE_IDENTIFIER: com.ryanshores.TexasWater
@@ -53,7 +54,7 @@ targets:
         MARKETING_VERSION: 1.0.0
         INFOPLIST_KEY_CFBundleVersion: "$(CURRENT_PROJECT_VERSION)"
         INFOPLIST_KEY_CFBundleShortVersionString: "$(MARKETING_VERSION)"
-        INFOPLIST_KEY_TEXAS_WATER_API_BASE_URL: "https://texas-water-api.ryan-shores.workers.dev"
+        TEXAS_WATER_API_BASE_URL: "https://texas-water-api.ryan-shores.workers.dev"
     scheme:
       testTargets: []
   TexasWaterWidget:

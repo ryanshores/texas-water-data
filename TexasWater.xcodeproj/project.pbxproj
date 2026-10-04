@@ -520,7 +520,6 @@
 				INFOPLIST_KEY_CFBundleShortVersionString = "$(MARKETING_VERSION)";
 				INFOPLIST_KEY_CFBundleVersion = "$(CURRENT_PROJECT_VERSION)";
 				INFOPLIST_KEY_LSApplicationCategoryType = "public.app-category.weather";
-				INFOPLIST_KEY_TEXAS_WATER_API_BASE_URL = "";
 				INFOPLIST_KEY_UIApplicationSceneManifest_Generation = YES;
 				INFOPLIST_KEY_UILaunchScreen_Generation = YES;
 				LD_RUNPATH_SEARCH_PATHS = (
@@ -533,6 +532,7 @@
 				SDKROOT = iphoneos;
 				SWIFT_VERSION = 6.0;
 				TARGETED_DEVICE_FAMILY = "1,2";
+				TEXAS_WATER_API_BASE_URL = "https://texas-water-api.ryan-shores.workers.dev";
 			};
 			name = Debug;
 		};
@@ -608,7 +608,6 @@
 				INFOPLIST_KEY_CFBundleShortVersionString = "$(MARKETING_VERSION)";
 				INFOPLIST_KEY_CFBundleVersion = "$(CURRENT_PROJECT_VERSION)";
 				INFOPLIST_KEY_LSApplicationCategoryType = "public.app-category.weather";
-				INFOPLIST_KEY_TEXAS_WATER_API_BASE_URL = "";
 				INFOPLIST_KEY_UIApplicationSceneManifest_Generation = YES;
 				INFOPLIST_KEY_UILaunchScreen_Generation = YES;
 				LD_RUNPATH_SEARCH_PATHS = (
@@ -621,6 +620,7 @@
 				SDKROOT = iphoneos;
 				SWIFT_VERSION = 6.0;
 				TARGETED_DEVICE_FAMILY = "1,2";
+				TEXAS_WATER_API_BASE_URL = "https://texas-water-api.ryan-shores.workers.dev";
 			};
 			name = Release;
 		};
