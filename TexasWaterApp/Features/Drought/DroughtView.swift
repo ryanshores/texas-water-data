@@ -45,7 +45,13 @@ struct DroughtView: View {
                     HStack { Text(category).font(.headline).frame(width: 42, alignment: .leading); Text(value.map { String(format: "%+.1f pts", $0) } ?? "Not available").foregroundStyle((value ?? 0) >= 0 ? .red : .green) }
                         .padding(.horizontal)
                 }
-                Text("Source: U.S. Drought Monitor via the Texas Water Development Board.").font(.footnote).foregroundStyle(.secondary).padding()
+                VStack(alignment: .leading, spacing: 5) {
+                    Text("Source: \(store.source.rawValue)")
+                    Text("Original data: U.S. Drought Monitor via the Texas Water Development Board.")
+                }
+                .font(.footnote)
+                .foregroundStyle(.secondary)
+                .padding()
             }
             .padding(.vertical)
         }

@@ -4,11 +4,17 @@ import TexasWaterCore
 
 @MainActor
 final class DroughtDataStore: ObservableObject {
+    enum Source: String {
+        case backend = "Texas Water API"
+        case direct = "Water Data for Texas"
+    }
+
     @Published private(set) var summary: DroughtSummary?
     @Published private(set) var isLoading = false
     @Published private(set) var errorMessage: String?
     @Published private(set) var countyRecords: [DroughtCountyRecord] = []
     @Published private(set) var isLoadingCounty = false
+    @Published private(set) var source: Source = .direct
 
     private let apiClient: TexasWaterAPIClient?
     private let twdbClient = TWDroughtClient()
@@ -29,13 +35,16 @@ final class DroughtDataStore: ObservableObject {
         do {
             if let apiClient {
                 summary = try await apiClient.fetchDroughtSummary()
+                source = .backend
             } else {
                 summary = try await twdbClient.fetchSummary()
+                source = .direct
             }
             errorMessage = nil
         } catch {
             do {
                 summary = try await twdbClient.fetchSummary()
+                source = .direct
                 errorMessage = nil
             } catch {
                 errorMessage = "Drought data is unavailable right now. \(error.localizedDescription)"
