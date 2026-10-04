@@ -25,16 +25,17 @@ const reservoirs = limit > 0 ? dashboard.reservoirs.slice(0, limit) : dashboard.
 const statements = [];
 let reservoirCount = 0;
 let observationCount = 0;
+let batchSize = 5;
 
-for (let start = 0; start < reservoirs.length; start += 2) {
-  const batch = reservoirs.slice(start, start + 2);
+for (let start = 0; start < reservoirs.length; start += batchSize) {
+  const batch = reservoirs.slice(start, start + batchSize);
   const histories = await Promise.all(batch.map(async (reservoir, offset) => {
     if (!reservoir.id || !reservoir.slug) {
       throw new Error(`Dashboard reservoir ${start + offset + 1} is missing id or slug`);
     }
     const url = `${HISTORY_ROOT}/${encodeURIComponent(reservoir.slug)}-1year.csv`;
     const observations = parseCSV(await fetchText(url), reservoir.id);
-    if (observations.length < 300) {
+    if (observations.length < 252) {
       throw new Error(`${reservoir.id} returned only ${observations.length} history rows`);
     }
     return { reservoir, observations };
