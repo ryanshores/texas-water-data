@@ -4,6 +4,7 @@ import UIKit
 
 struct NotificationSettingsView: View {
     @EnvironmentObject private var alerts: LocalAlertManager
+    @Environment(\.scenePhase) private var scenePhase
 
     var body: some View {
         List {
@@ -35,6 +36,10 @@ struct NotificationSettingsView: View {
             if enabled, alerts.authorizationStatus == .notDetermined {
                 Task { await alerts.requestAuthorization() }
             }
+        }
+        .onChange(of: scenePhase) { _, phase in
+            guard phase == .active else { return }
+            Task { await alerts.refreshAuthorizationStatus() }
         }
     }
 

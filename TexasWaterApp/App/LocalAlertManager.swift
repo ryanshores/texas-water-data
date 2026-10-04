@@ -46,7 +46,7 @@ final class LocalAlertManager: NSObject, ObservableObject {
         if thresholdAlerts {
             var states = thresholdStates
             for reservoir in favoriteReservoirs {
-                let state = thresholdState(for: reservoir)
+                guard let state = thresholdState(for: reservoir) else { continue }
                 let previous = states[reservoir.id]
                 if previous != state, state != "normal" {
                     await schedule(
@@ -91,7 +91,7 @@ final class LocalAlertManager: NSObject, ObservableObject {
         }
     }
 
-    private func refreshAuthorizationStatus() async {
+    func refreshAuthorizationStatus() async {
         authorizationStatus = await center.notificationSettings().authorizationStatus
     }
 
@@ -123,12 +123,14 @@ final class LocalAlertManager: NSObject, ObservableObject {
         return true
     }
 
-    private func thresholdState(for reservoir: ReservoirSummary) -> String {
+    private func thresholdState(for reservoir: ReservoirSummary) -> String? {
+        guard reservoir.percentFull != nil else { return nil }
         switch reservoir.status {
-        case .critical: "critically low"
-        case .low: "low"
-        case .nearFull: "near full"
-        default: "normal"
+        case .critical: return "critically low"
+        case .low: return "low"
+        case .nearFull: return "near full"
+        case .normal: return "normal"
+        case .unavailable: return nil
         }
     }
 
