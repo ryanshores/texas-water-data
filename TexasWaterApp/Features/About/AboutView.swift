@@ -31,6 +31,12 @@ struct AboutView: View {
                     Link("Methodology", destination: URL(string: "https://waterdatafortexas.org/reservoirs/methodology")!)
                 }
 
+                Section("Data delivery") {
+                    Text("The app normally reads the Texas Water API, which keeps a compact copy of the official data and historical observations. If the service is unavailable, it falls back to the official Water Data for Texas feeds or saved data on this device.")
+                        .font(.footnote)
+                    Link("Check API status", destination: URL(string: "https://texas-water-api.ryan-shores.workers.dev/health")!)
+                }
+
                 Section("Privacy") {
                     Text("Favorites and cached readings remain on this device. This version does not require an account or collect precise location.")
                         .font(.footnote)

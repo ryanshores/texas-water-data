@@ -108,11 +108,12 @@ MapKit, SwiftData, WidgetKit, App Intents, and BackgroundTasks.
 - Search, basin filtering, detail charts, and map. **Merged.**
 - Backend ingestion, normalized API, offline cache, and freshness states.
   **Implemented; production D1 migrations and Worker deployment are complete.
-  A repeatable one-time history backfill utility remains to be run against the
-  owner's authenticated Wrangler account.**
-- Small and medium widgets. **Merged; signed-device App Group provisioning and
-  device validation remain.**
-- Accessibility, TestFlight, and source attribution. **Release work remains.**
+  Historical observations have been backfilled through the current one-year
+  window.**
+- Small and medium widgets. **Merged and device-validated; follow-up issue
+  [#5](https://github.com/ryanshores/texas-water-data/issues/5) tracks reservoir
+  deep links and small-family percentage truncation.**
+- Accessibility, TestFlight, and source attribution. **Complete for Phase 1.**
 
 ### Phase 1.1 — alerts and polish
 
@@ -140,18 +141,13 @@ MapKit, SwiftData, WidgetKit, App Intents, and BackgroundTasks.
 
 ## Current position and recommended sequence
 
-Phase 0 is complete, the core Phase 1 experience is merged, and Phase 1.2 is
-implemented. The production Worker is deployed, the app is configured to use
-it, and the remaining work is Phase 1 release readiness.
+Phase 0, Phase 1, and Phase 1.2 are complete. The production Worker is
+deployed, the app is configured to use it, historical observations have been
+backfilled, and the app has passed the release-readiness checks.
 
-1. Run the one-time historical backfill documented in `backend/README.md` so
-   movers and one-year charts are populated from the start.
-2. Complete signed-device accessibility/network testing and an internal
-   TestFlight build. This validates widgets, shared App Group storage, and the
-   direct-feed fallback under real conditions.
-3. Finish App Store privacy, support, attribution, and data-source screens.
-4. Add alerts only after the backfill and ingestion reliability checks make
-   change thresholds trustworthy.
+1. Begin Phase 1.1: alerts and polish.
+2. Address widget follow-up issue [#5](https://github.com/ryanshores/texas-water-data/issues/5)
+   as part of that polish work.
 
 ### Phase 2 — drought
 

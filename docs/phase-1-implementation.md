@@ -38,17 +38,17 @@ response and falls back automatically if the service is empty or unavailable.
 - The production `texas-water` D1 migrations have been applied and the Worker is
   deployed at `https://texas-water-api.ryan-shores.workers.dev`. Verify `/health`
   and `/v1/dashboard` after future deployments.
-- Backfill historical observations with `npm run backfill:history` and the
-  remote D1 commands documented in `backend/README.md`. Until this one-time
-  operation is run, movers accumulate as scheduled daily observations arrive,
-  while detail charts continue to use the official TWDB CSV fallback.
-- Enable the `group.com.ryanshores.TexasWater` App Group for both bundle IDs in
-  the Apple Developer account so widget favorites and the app cache can share
-  storage on a signed device.
-- Complete device-level Dynamic Type, VoiceOver, high-contrast, map-density,
-  and degraded-network QA.
-- Configure App Store/TestFlight metadata, privacy details, and distribution
-  signing, then ship the first internal build.
+- Historical observations have been backfilled through the current one-year
+  window. The production history endpoint now returns 366 daily observations
+  for populated reservoirs, so movers and long-range charts are available from
+  the start.
+- The `group.com.ryanshores.TexasWater` App Group is configured and signed-device
+  validation is complete.
+- Device-level Dynamic Type, VoiceOver, high-contrast, map-density, and
+  degraded-network QA is complete.
+- App Store/TestFlight metadata, privacy details, source attribution, and the
+  first internal build checks are complete. Widget deep linking and small-family
+  percentage formatting remain tracked in issue #5.
 
 ## Verification commands
 
