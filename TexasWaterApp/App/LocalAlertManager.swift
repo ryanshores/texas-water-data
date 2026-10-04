@@ -76,7 +76,7 @@ final class LocalAlertManager: NSObject, ObservableObject {
         }
 
         if weeklySummary, Calendar.current.component(.weekday, from: .now) == 1 {
-            let key = "weekly-\(dashboard.observationDate)"
+            let key = "weekly-\(calendarWeekKey(for: .now))"
             if claimDelivery(key) {
                 let highlights = favoriteReservoirs.prefix(3).map {
                     "\($0.shortName) \(WaterFormatting.percent($0.percentFull))"
@@ -130,6 +130,11 @@ final class LocalAlertManager: NSObject, ObservableObject {
         case .nearFull: "near full"
         default: "normal"
         }
+    }
+
+    private func calendarWeekKey(for date: Date) -> String {
+        let components = Calendar.current.dateComponents([.yearForWeekOfYear, .weekOfYear], from: date)
+        return "\(components.yearForWeekOfYear ?? 0)-\(components.weekOfYear ?? 0)"
     }
 }
 

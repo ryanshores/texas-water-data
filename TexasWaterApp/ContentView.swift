@@ -12,6 +12,7 @@ struct ContentView: View {
 
     @StateObject private var store = ReservoirDataStore()
     @StateObject private var alerts = LocalAlertManager()
+    @ObservedObject private var deepLinkInbox = TexasWaterDeepLinkInbox.shared
     @State private var selectedTab: Tab = .today
     @State private var pendingReservoirID: String?
     @State private var deepLinkedReservoir: ReservoirSummary?
@@ -41,16 +42,22 @@ struct ContentView: View {
         .tint(Color.waterBlue)
         .environmentObject(store)
         .environmentObject(alerts)
-        .task { await store.load() }
+        .task {
+            await store.load()
+            if let url = deepLinkInbox.takePendingURL() {
+                open(url)
+            }
+        }
         .onOpenURL(perform: open)
         .onChange(of: store.reservoirs) { _, _ in presentPendingReservoirIfAvailable() }
         .onChange(of: store.dashboard) { _, dashboard in
             guard let dashboard else { return }
             Task { await alerts.evaluate(dashboard: dashboard, favorites: store.favoriteIDs) }
         }
-        .onReceive(NotificationCenter.default.publisher(for: .openTexasWaterURL)) { notification in
-            guard let url = notification.object as? URL else { return }
+        .onChange(of: deepLinkInbox.pendingURL) { _, url in
+            guard let url else { return }
             open(url)
+            _ = deepLinkInbox.takePendingURL()
         }
         .sheet(item: $deepLinkedReservoir) { reservoir in
             NavigationStack {

@@ -2,11 +2,7 @@ import SwiftUI
 import UIKit
 import UserNotifications
 
-extension Notification.Name {
-    static let openTexasWaterURL = Notification.Name("openTexasWaterURL")
-}
-
-final class TexasWaterAppDelegate: NSObject, UIApplicationDelegate, UNUserNotificationCenterDelegate {
+final class TexasWaterAppDelegate: NSObject, UIApplicationDelegate, @preconcurrency UNUserNotificationCenterDelegate {
     func application(
         _ application: UIApplication,
         didFinishLaunchingWithOptions launchOptions: [UIApplication.LaunchOptionsKey: Any]? = nil
@@ -15,7 +11,7 @@ final class TexasWaterAppDelegate: NSObject, UIApplicationDelegate, UNUserNotifi
         return true
     }
 
-    func userNotificationCenter(
+    nonisolated func userNotificationCenter(
         _ center: UNUserNotificationCenter,
         willPresent notification: UNNotification,
         withCompletionHandler completionHandler: @escaping (UNNotificationPresentationOptions) -> Void
@@ -23,7 +19,7 @@ final class TexasWaterAppDelegate: NSObject, UIApplicationDelegate, UNUserNotifi
         completionHandler([.banner, .sound])
     }
 
-    func userNotificationCenter(
+    nonisolated func userNotificationCenter(
         _ center: UNUserNotificationCenter,
         didReceive response: UNNotificationResponse
     ) async {
@@ -31,7 +27,7 @@ final class TexasWaterAppDelegate: NSObject, UIApplicationDelegate, UNUserNotifi
               let url = URL(string: rawURL) else {
             return
         }
-        NotificationCenter.default.post(name: .openTexasWaterURL, object: url)
+        await TexasWaterDeepLinkInbox.shared.receive(url)
     }
 }
 

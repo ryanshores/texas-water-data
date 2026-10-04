@@ -1,4 +1,5 @@
 import SwiftUI
+import UIKit
 import UserNotifications
 
 struct NotificationSettingsView: View {
@@ -20,7 +21,9 @@ struct NotificationSettingsView: View {
 
             Section("Permission") {
                 LabeledContent("System status", value: statusLabel)
-                if alerts.authorizationStatus != .authorized && alerts.authorizationStatus != .provisional {
+                if alerts.authorizationStatus == .denied {
+                    Link("Open Notification Settings", destination: URL(string: UIApplication.openSettingsURLString)!)
+                } else if alerts.authorizationStatus != .authorized && alerts.authorizationStatus != .provisional {
                     Button("Allow notifications") {
                         Task { await alerts.requestAuthorization() }
                     }
