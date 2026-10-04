@@ -41,6 +41,12 @@ struct AboutView: View {
                     Text("Favorites and cached readings remain on this device. This version does not require an account or collect precise location.")
                         .font(.footnote)
                 }
+
+                Section("Preferences") {
+                    NavigationLink("Notifications") {
+                        NotificationSettingsView()
+                    }
+                }
             }
             .navigationTitle("About")
         }

@@ -118,7 +118,13 @@ struct TexasWaterWidget: Widget {
         }
         .configurationDisplayName("Texas Water")
         .description("See Texas reservoir conditions at a glance.")
-        .supportedFamilies([.systemSmall, .systemMedium])
+        .supportedFamilies([
+            .systemSmall,
+            .systemMedium,
+            .accessoryInline,
+            .accessoryCircular,
+            .accessoryRectangular,
+        ])
     }
 }
 
@@ -131,6 +137,12 @@ struct TexasWaterWidgetView: View {
             if let dashboard = entry.dashboard {
                 if family == .systemSmall {
                     smallDashboard(dashboard)
+                } else if family == .accessoryInline {
+                    inlineDashboard(dashboard)
+                } else if family == .accessoryCircular {
+                    circularDashboard(dashboard)
+                } else if family == .accessoryRectangular {
+                    rectangularDashboard(dashboard)
                 } else {
                     mediumDashboard(dashboard)
                 }
@@ -139,7 +151,6 @@ struct TexasWaterWidgetView: View {
             }
         }
         .foregroundStyle(.white)
-        .widgetURL(URL(string: "texaswater://today"))
     }
 
     private func smallDashboard(_ dashboard: ReservoirDashboard) -> some View {
@@ -152,8 +163,11 @@ struct TexasWaterWidgetView: View {
                 .font(.headline)
                 .lineLimit(1)
             Text(percent(focus?.percentFull ?? dashboard.statewidePercentFull))
-                .font(.system(size: 34, weight: .bold, design: .rounded))
+                .font(.system(size: 30, weight: .bold, design: .rounded))
                 .monospacedDigit()
+                .lineLimit(1)
+                .minimumScaleFactor(0.65)
+                .allowsTightening(true)
             Text(focus == nil ? "statewide conservation capacity" : statusLabel(for: focus!))
                 .font(.caption)
                 .foregroundStyle(.white.opacity(0.8))
@@ -161,6 +175,7 @@ struct TexasWaterWidgetView: View {
             freshness
         }
         .padding()
+        .widgetURL(focus.map { TexasWaterDeepLink.reservoirURL(id: $0.id) } ?? TexasWaterDeepLink.todayURL)
     }
 
     private func mediumDashboard(_ dashboard: ReservoirDashboard) -> some View {
@@ -177,20 +192,57 @@ struct TexasWaterWidgetView: View {
                 .foregroundStyle(.white.opacity(0.8))
 
             ForEach(featuredReservoirs(in: dashboard)) { reservoir in
-                HStack {
-                    Text(reservoir.shortName).lineLimit(1)
-                    Spacer()
-                    Text(percent(reservoir.percentFull)).monospacedDigit()
-                    Text(statusLabel(for: reservoir))
-                        .font(.caption2)
-                        .foregroundStyle(.white.opacity(0.75))
+                Link(destination: TexasWaterDeepLink.reservoirURL(id: reservoir.id)) {
+                    HStack {
+                        Text(reservoir.shortName).lineLimit(1)
+                        Spacer()
+                        Text(percent(reservoir.percentFull)).monospacedDigit()
+                        Text(statusLabel(for: reservoir))
+                            .font(.caption2)
+                            .foregroundStyle(.white.opacity(0.75))
+                    }
+                    .font(.subheadline)
                 }
-                .font(.subheadline)
+                .buttonStyle(.plain)
             }
             Spacer(minLength: 0)
             freshness
         }
         .padding()
+        .widgetURL(TexasWaterDeepLink.todayURL)
+    }
+
+    private func inlineDashboard(_ dashboard: ReservoirDashboard) -> some View {
+        let focus = preferredReservoir(in: dashboard)
+        return Text("\(focus?.shortName ?? "Texas") \(percent(focus?.percentFull ?? dashboard.statewidePercentFull))")
+            .widgetURL(focus.map { TexasWaterDeepLink.reservoirURL(id: $0.id) } ?? TexasWaterDeepLink.todayURL)
+    }
+
+    private func circularDashboard(_ dashboard: ReservoirDashboard) -> some View {
+        let focus = preferredReservoir(in: dashboard)
+        let value = (focus?.percentFull ?? dashboard.statewidePercentFull ?? 0) / 100
+        return Gauge(value: min(max(value, 0), 1)) {
+            Text(focus?.shortName ?? "Texas")
+        } currentValueLabel: {
+            Text(percent(focus?.percentFull ?? dashboard.statewidePercentFull))
+                .minimumScaleFactor(0.5)
+        }
+        .gaugeStyle(.accessoryCircularCapacity)
+        .widgetURL(focus.map { TexasWaterDeepLink.reservoirURL(id: $0.id) } ?? TexasWaterDeepLink.todayURL)
+    }
+
+    private func rectangularDashboard(_ dashboard: ReservoirDashboard) -> some View {
+        let focus = preferredReservoir(in: dashboard)
+        return VStack(alignment: .leading) {
+            Text(focus?.shortName ?? "Texas reservoirs")
+                .font(.headline)
+                .lineLimit(1)
+            Text(percent(focus?.percentFull ?? dashboard.statewidePercentFull))
+                .font(.title2.monospacedDigit())
+            Text(focus.map(statusLabel(for:)) ?? "Statewide")
+                .font(.caption)
+        }
+        .widgetURL(focus.map { TexasWaterDeepLink.reservoirURL(id: $0.id) } ?? TexasWaterDeepLink.todayURL)
     }
 
     private var unavailable: some View {
@@ -204,6 +256,7 @@ struct TexasWaterWidgetView: View {
                 .foregroundStyle(.white.opacity(0.8))
         }
         .padding()
+        .widgetURL(TexasWaterDeepLink.todayURL)
     }
 
     private var freshness: some View {

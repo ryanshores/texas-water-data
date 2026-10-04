@@ -117,9 +117,13 @@ MapKit, SwiftData, WidgetKit, App Intents, and BackgroundTasks.
 
 ### Phase 1.1 — alerts and polish
 
-- Threshold and rapid-change APNs alerts.
-- Weekly favorite summary, Lock Screen widgets, and deep links.
-- App Store privacy, support, attribution, and data-source screens.
+- Threshold and rapid-change local alerts evaluated on refresh. Remote APNs
+  delivery is deferred until distribution work. **Implemented for local
+  development.**
+- Weekly favorite summary, Lock Screen widgets, and reservoir deep links.
+  **Implemented.**
+- Privacy, attribution, data-source, API health, and notification-preference
+  screens. **Implemented for local development.**
 
 ### Phase 1.2 — reservoir scale and basin intelligence
 
@@ -141,13 +145,15 @@ MapKit, SwiftData, WidgetKit, App Intents, and BackgroundTasks.
 
 ## Current position and recommended sequence
 
-Phase 0, Phase 1, and Phase 1.2 are complete. The production Worker is
-deployed, the app is configured to use it, historical observations have been
-backfilled, and the app has passed the release-readiness checks.
+Phase 0, Phase 1, Phase 1.1, and Phase 1.2 are complete for local development.
+The production Worker is deployed, the app is configured to use it, historical
+observations have been backfilled, and the app has passed the release-readiness
+checks. Remote APNs delivery and App Store distribution remain deferred until an
+Apple Developer Program account is in scope.
 
-1. Begin Phase 1.1: alerts and polish.
-2. Address widget follow-up issue [#5](https://github.com/ryanshores/texas-water-data/issues/5)
-   as part of that polish work.
+1. Begin Phase 2: drought conditions and county-level context.
+2. Revisit APNs delivery and App Store distribution when an Apple Developer
+   Program account is available.
 
 ### Phase 2 — drought
 

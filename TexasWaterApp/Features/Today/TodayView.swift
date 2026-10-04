@@ -39,6 +39,18 @@ struct TodayView: View {
                                 )
                             }
 
+                            if !store.favorites.isEmpty {
+                                DashboardSection(
+                                    title: "Favorite weekly summary",
+                                    subtitle: "Largest seven-day movement",
+                                    reservoirs: store.favorites.sorted {
+                                        abs($0.trend.sevenDays ?? 0) > abs($1.trend.sevenDays ?? 0)
+                                    },
+                                    capacityContext: store.capacityContext,
+                                    emptyMessage: "Seven-day history is still building"
+                                )
+                            }
+
                             if store.hasTrendData {
                                 DashboardSection(
                                     title: "Rising fastest",
