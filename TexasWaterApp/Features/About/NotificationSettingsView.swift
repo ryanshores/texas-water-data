@@ -1,6 +1,6 @@
 import SwiftUI
 import UIKit
-import UserNotifications
+@preconcurrency import UserNotifications
 
 struct NotificationSettingsView: View {
     @EnvironmentObject private var alerts: LocalAlertManager
