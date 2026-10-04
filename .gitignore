@@ -8,3 +8,5 @@ phase-0-smoke-report.json
 backend/node_modules/
 backend/.wrangler/
 backend/.dev.vars
+backend/.backfill/
+.idea

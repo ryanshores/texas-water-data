@@ -107,9 +107,11 @@ MapKit, SwiftData, WidgetKit, App Intents, and BackgroundTasks.
 - Today dashboard, favorites, movers, full/low rankings. **Merged.**
 - Search, basin filtering, detail charts, and map. **Merged.**
 - Backend ingestion, normalized API, offline cache, and freshness states.
-  **Implemented; D1 has been created, while remote migration, deployment, and
-  history backfill remain.**
-- Small and medium widgets. **Merged; App Group provisioning remains.**
+  **Implemented; production D1 migrations and Worker deployment are complete.
+  A repeatable one-time history backfill utility remains to be run against the
+  owner's authenticated Wrangler account.**
+- Small and medium widgets. **Merged; signed-device App Group provisioning and
+  device validation remain.**
 - Accessibility, TestFlight, and source attribution. **Release work remains.**
 
 ### Phase 1.1 — alerts and polish
@@ -134,21 +136,20 @@ MapKit, SwiftData, WidgetKit, App Intents, and BackgroundTasks.
 - Add unit coverage for tier boundaries, paired storage/capacity aggregation,
   and basin rollups. Validate direct-TWDB and backend results match.
 
+**Status: implemented and merged.**
+
 ## Current position and recommended sequence
 
-Phase 0 is complete and Phase 1 is merged. The app already provides the core
-phone experience, including browsing by basin; production data service and
-release readiness are the remaining Phase 1 work.
+Phase 0 is complete, the core Phase 1 experience is merged, and Phase 1.2 is
+implemented. The production Worker is deployed, the app is configured to use
+it, and the remaining work is Phase 1 release readiness.
 
-1. Finish the production backend: apply remote D1 migrations, deploy the
-   Worker, trigger ingestion, backfill enough daily history for movers, verify
-   the HTTPS endpoints, then configure the app's backend URL.
-2. Build Phase 1.2 reservoir scale and basin intelligence. The required
-   capacity and basin fields already exist in the current catalog, so this is
-   a high-value feature with no new external data dependency.
-3. Complete signed-device accessibility/network testing and an internal
+1. Run the one-time historical backfill documented in `backend/README.md` so
+   movers and one-year charts are populated from the start.
+2. Complete signed-device accessibility/network testing and an internal
    TestFlight build. This validates widgets, shared App Group storage, and the
    direct-feed fallback under real conditions.
+3. Finish App Store privacy, support, attribution, and data-source screens.
 4. Add alerts only after the backfill and ingestion reliability checks make
    change thresholds trustworthy.
 

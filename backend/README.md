@@ -37,5 +37,24 @@ Remote setup intentionally remains an account-owner operation:
 5. Put the HTTPS Worker URL in `TEXAS_WATER_API_BASE_URL` in `project.yml` and
    regenerate the Xcode project.
 
+### Historical backfill
+
+The scheduled ingest builds history from the date the Worker is deployed onward.
+Run the repeatable backfill utility once to seed the official one-year records
+needed for movers and long-range charts:
+
+```sh
+cd backend
+npm run backfill:history
+for file in .backfill/*/chunk-*.sql; do
+  npx wrangler d1 execute texas-water --remote --file "$file"
+done
+```
+
+The utility fetches the live production catalog to preserve the D1 reservoir
+identifiers, downloads each official TWDB one-year CSV with bounded retries, and
+emits idempotent SQL chunks. It never needs a Cloudflare token in the repository;
+Wrangler supplies authentication for the remote D1 commands.
+
 No credentials are stored in this repository. The Worker is intentionally
 read-only over HTTP; ingestion only runs through the scheduled handler.
