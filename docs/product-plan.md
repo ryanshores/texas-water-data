@@ -43,6 +43,8 @@ after the core experience is reliable.
 - Toggle statewide rankings between all reservoirs and major-capacity reservoirs
   so a rapid change at a small lake does not obscure a large water-supply
   reservoir.
+- Cluster reservoir markers at wide zoom levels with a count badge and
+  capacity-weighted fullness color; tapping a cluster zooms into its members.
 - MapKit marker clustering with accessible status labels.
 
 ### Basin detail
