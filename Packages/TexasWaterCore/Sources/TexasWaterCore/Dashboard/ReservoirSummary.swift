@@ -10,7 +10,7 @@ public enum ReservoirStatus: String, Codable, CaseIterable, Sendable {
     public static func classify(percentFull: Double?) -> ReservoirStatus {
         guard let percentFull else { return .unavailable }
         switch percentFull {
-        case 95...: return .nearFull
+        case 85...: return .nearFull
         case ..<10: return .critical
         case ..<25: return .low
         default: return .normal

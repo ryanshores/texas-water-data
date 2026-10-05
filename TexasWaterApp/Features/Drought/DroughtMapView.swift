@@ -26,6 +26,7 @@ struct TexasWaterMapView: UIViewRepresentable {
             ),
             animated: false
         )
+        context.coordinator.mapView = map
         return map
     }
 
@@ -93,6 +94,7 @@ struct TexasWaterMapView: UIViewRepresentable {
         var onSelectReservoir: (ReservoirSummary) -> Void = { _ in }
         var droughtAreas: [DroughtMapArea]?
         var reservoirs: [ReservoirSummary]?
+        weak var mapView: MKMapView?
 
         func mapView(_ mapView: MKMapView, rendererFor overlay: MKOverlay) -> MKOverlayRenderer {
             guard let polygon = overlay as? MKPolygon else {
@@ -117,9 +119,9 @@ struct TexasWaterMapView: UIViewRepresentable {
                 let view = (mapView.dequeueReusableAnnotationView(withIdentifier: identifier) as? MKMarkerAnnotationView)
                     ?? MKMarkerAnnotationView(annotation: annotation, reuseIdentifier: identifier)
                 view.annotation = annotation
-                view.glyphImage = UIImage(systemName: Self.symbol(for: reservoirAnnotation.reservoir.status))
+                view.glyphImage = UIImage(systemName: reservoirAnnotation.reservoir.status.systemImage)
                 view.glyphText = nil
-                view.markerTintColor = Self.color(for: reservoirAnnotation.reservoir.status)
+                view.markerTintColor = reservoirAnnotation.reservoir.status.systemColor
                 view.clusteringIdentifier = "reservoirs"
                 view.displayPriority = .defaultHigh
                 view.titleVisibility = .hidden
@@ -150,7 +152,7 @@ struct TexasWaterMapView: UIViewRepresentable {
             view.annotation = cluster
             view.glyphImage = nil
             view.glyphText = "\(reservoirs.count)"
-            view.markerTintColor = Self.color(for: ReservoirStatus.classify(percentFull: percentFull))
+            view.markerTintColor = ReservoirStatus.classify(percentFull: percentFull).systemColor
             view.clusteringIdentifier = "reservoirs"
             view.displayPriority = .required
             view.canShowCallout = true
@@ -169,15 +171,24 @@ struct TexasWaterMapView: UIViewRepresentable {
         private func zoom(to cluster: MKClusterAnnotation, on mapView: MKMapView) {
             var rect = MKMapRect.null
             for member in cluster.memberAnnotations {
-                let coordinate = member.coordinate
-                let point = MKMapPoint(coordinate)
-                rect = rect.union(MKMapRect(origin: point, size: MKMapSize(width: 0, height: 0)))
+                let point = MKMapPoint(member.coordinate)
+                rect = rect.union(MKMapRect(origin: point, size: .init(width: 0, height: 0)))
             }
             guard !rect.isNull else { return }
+
+            // Get usable size (in points)
+            let insets = mapView.safeAreaInsets
+            let usableWidth = mapView.bounds.width - (insets.left + insets.right)
+            let usableHeight = mapView.bounds.height - (insets.top + insets.bottom)
+
+            // Derive padding relative to size
+            let xPadding = max(160, usableWidth * 0.15)
+            let yPadding = max(120, usableHeight * 0.20)
+
             mapView.deselectAnnotation(cluster, animated: false)
             mapView.setVisibleMapRect(
                 rect,
-                edgePadding: UIEdgeInsets(top: 80, left: 60, bottom: 80, right: 60),
+                edgePadding: UIEdgeInsets(top: yPadding, left: xPadding, bottom: yPadding, right: xPadding),
                 animated: true
             )
         }
@@ -200,26 +211,6 @@ struct TexasWaterMapView: UIViewRepresentable {
             let knownPercentages = reservoirs.compactMap(\.percentFull)
             guard !knownPercentages.isEmpty else { return nil }
             return knownPercentages.reduce(0, +) / Double(knownPercentages.count)
-        }
-
-        private static func color(for status: ReservoirStatus) -> UIColor {
-            switch status {
-            case .nearFull: return .systemBlue
-            case .normal: return .systemTeal
-            case .low: return .systemOrange
-            case .critical: return .systemRed
-            case .unavailable: return .systemGray
-            }
-        }
-
-        private static func symbol(for status: ReservoirStatus) -> String {
-            switch status {
-            case .nearFull: return "drop.fill"
-            case .normal: return "drop.halffull"
-            case .low: return "drop"
-            case .critical: return "exclamationmark.triangle.fill"
-            case .unavailable: return "questionmark.circle"
-            }
         }
 
         private static func color(for category: String?) -> UIColor {

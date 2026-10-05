@@ -48,11 +48,11 @@ struct ReservoirDetailView: View {
                 Spacer()
                 Label(reservoir.status.label, systemImage: reservoir.status.systemImage)
                     .font(.subheadline.bold())
-                    .foregroundStyle(Color.reservoirStatus(reservoir.status))
+                    .foregroundStyle(reservoir.status.color)
             }
 
             ProgressView(value: min(max(reservoir.percentFull ?? 0, 0), 100), total: 100)
-                .tint(Color.reservoirStatus(reservoir.status))
+                .tint(reservoir.status.color)
                 .accessibilityLabel("Percent full")
                 .accessibilityValue(WaterFormatting.percent(reservoir.percentFull))
 

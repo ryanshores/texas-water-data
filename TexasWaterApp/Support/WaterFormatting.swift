@@ -27,16 +27,6 @@ enum WaterFormatting {
 
 extension Color {
     static let waterBlue = Color(red: 0.03, green: 0.42, blue: 0.68)
-
-    static func reservoirStatus(_ status: ReservoirStatus) -> Color {
-        switch status {
-        case .nearFull: return .blue
-        case .normal: return .cyan
-        case .low: return .orange
-        case .critical: return .red
-        case .unavailable: return .gray
-        }
-    }
 }
 
 extension ReservoirStatus {
@@ -58,5 +48,19 @@ extension ReservoirStatus {
         case .critical: return "exclamationmark.triangle.fill"
         case .unavailable: return "questionmark.circle"
         }
+    }
+
+    var systemColor: UIColor {
+        switch self {
+        case .nearFull: return .systemBlue
+        case .normal: return .systemTeal
+        case .low: return .systemOrange
+        case .critical: return .systemRed
+        case .unavailable: return .systemGray
+        }
+    }
+
+    var color: Color {
+        Color(uiColor: systemColor)
     }
 }

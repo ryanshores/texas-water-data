@@ -12,10 +12,10 @@ struct ReservoirRow: View {
         HStack(spacing: 12) {
             ZStack {
                 Circle()
-                    .fill(Color.reservoirStatus(reservoir.status).opacity(0.14))
+                    .fill(reservoir.status.color.opacity(0.14))
                     .frame(width: 42, height: 42)
                 Image(systemName: reservoir.status.systemImage)
-                    .foregroundStyle(Color.reservoirStatus(reservoir.status))
+                    .foregroundStyle(reservoir.status.color)
             }
             .accessibilityHidden(true)
 
