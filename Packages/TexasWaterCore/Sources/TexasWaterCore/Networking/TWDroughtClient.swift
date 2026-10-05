@@ -253,6 +253,25 @@ private struct CountyTopologyGeometry: Decodable {
     let id: String?
     let properties: CountyTopologyProperties
     let arcs: [[Int]]?
+
+    enum CodingKeys: String, CodingKey {
+        case id
+        case properties
+        case arcs
+    }
+
+    init(from decoder: Decoder) throws {
+        let container = try decoder.container(keyedBy: CodingKeys.self)
+        id = try container.decodeIfPresent(String.self, forKey: .id)
+        properties = try container.decode(CountyTopologyProperties.self, forKey: .properties)
+        if let polygon = try? container.decode([[Int]].self, forKey: .arcs) {
+            arcs = polygon
+        } else if let multiPolygon = try? container.decode([[[Int]]].self, forKey: .arcs) {
+            arcs = multiPolygon.flatMap { $0 }
+        } else {
+            arcs = nil
+        }
+    }
 }
 
 private struct CountyTopologyProperties: Decodable {
