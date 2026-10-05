@@ -66,7 +66,8 @@ export async function fetchDroughtCounty(
   county: string,
   fetcher: typeof fetch = fetch,
 ): Promise<DroughtCountyRecord[]> {
-  const encoded = encodeURIComponent(county.trim().toLowerCase());
+  const normalized = county.trim().toLowerCase().replace(/\s+county$/, "");
+  const encoded = encodeURIComponent(normalized);
   const response = await fetchJSON<unknown[]>(`${DROUGHT_COUNTY_URL}/${encoded}`, fetcher);
   return response.filter(isRecord).map(parseCountyRecord).filter(isPresent);
 }

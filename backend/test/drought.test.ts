@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest";
-import { countyBoundary, fetchDroughtSummary } from "../src/drought";
+import { countyBoundary, fetchDroughtCounty, fetchDroughtSummary } from "../src/drought";
 
 describe("drought source normalization", () => {
   it("returns the latest state record and week-over-week deltas", async () => {
@@ -78,5 +78,30 @@ describe("county topology normalization", () => {
     }, "Travis County");
 
     expect(boundary?.coordinates).toEqual([[[-100, 30], [-99, 30], [-99, 31], [-100, 31], [-100, 30]]]);
+  });
+});
+
+describe("county request normalization", () => {
+  it("accepts catalog labels that include the County suffix", async () => {
+    let requestedURL = "";
+    const fetcher: typeof fetch = async (input) => {
+      requestedURL = String(input);
+      return Response.json([{
+        MapDate: "20260929",
+        FIPS: "48001",
+        County: "Anderson County",
+        State: "TX",
+        None: 0,
+        D0: 100,
+        D1: 0,
+        D2: 0,
+        D3: 0,
+        D4: 0,
+      }]);
+    };
+
+    await fetchDroughtCounty("Anderson County", fetcher);
+
+    expect(requestedURL).toBe("https://waterdatafortexas.org/drought/api/drought-monitor/data/county/anderson");
   });
 });
