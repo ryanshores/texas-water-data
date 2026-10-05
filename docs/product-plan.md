@@ -37,6 +37,8 @@ after the core experience is reliable.
 
 - Search by lake name.
 - Filter by basin, planning region, municipal area, and distance.
+- Basin filtering lives on the Reservoirs screen; a separate basin tab is not
+  needed because its map and list are driven by the same filter.
 - Sort by fastest rising/falling, fullest/lowest, storage change, or distance.
 - Toggle statewide rankings between all reservoirs and major-capacity reservoirs
   so a rapid change at a small lake does not obscure a large water-supply

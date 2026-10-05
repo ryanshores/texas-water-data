@@ -31,8 +31,8 @@ struct ReservoirListView: View {
 
     private var list: some View {
         List {
-            if !store.reservoirs.isEmpty {
-                ReservoirMapPanel(reservoirs: store.reservoirs)
+            if !filteredReservoirs.isEmpty {
+                ReservoirMapPanel(reservoirs: filteredReservoirs)
                     .listRowInsets(EdgeInsets())
                     .listRowSeparator(.hidden)
             }
