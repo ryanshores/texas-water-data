@@ -150,6 +150,13 @@ struct DroughtView: View {
                 .chartYAxisLabel("County area in drought", position: .leading)
                 .chartLegend(position: .bottom, alignment: .leading)
                 .frame(height: 160)
+                VStack(alignment: .leading, spacing: 4) {
+                    Text("How to read this chart").font(.caption.bold())
+                    Text("D0+ (orange) is the percent of county area that is abnormally dry or worse. D2+ (red) is the percent in severe drought or worse. The D3 badge above is the current highest category affecting any part of the county; it is a status label, not a third line.")
+                }
+                .font(.caption)
+                .foregroundStyle(.secondary)
+                .accessibilityElement(children: .combine)
             }
         }
     }
