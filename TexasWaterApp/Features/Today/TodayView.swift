@@ -79,7 +79,7 @@ struct TodayView: View {
 
                             DashboardSection(
                                 title: "Near full",
-                                subtitle: "At least 95% of conservation capacity",
+                                subtitle: "At least 85% of conservation capacity",
                                 reservoirs: store.majorOnly(store.nearFull, enabled: majorOnly),
                                 capacityContext: store.capacityContext,
                                 emptyMessage: "No reservoirs are near full"

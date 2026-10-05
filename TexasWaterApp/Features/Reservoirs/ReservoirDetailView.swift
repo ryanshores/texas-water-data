@@ -39,14 +39,13 @@ struct ReservoirDetailView: View {
         }
         .task { await store.loadHistory(for: reservoir) }
     }
-    
+
     private var map: some View {
         VStack(alignment: .leading, spacing: 14) {
             HStack {
                 TexasWaterMapView(
                     droughtAreas: [],
-                    reservoirs: [reservoir],
-//                    onSelectReservoir: { selectedReservoir = $0 }
+                    reservoirs: [reservoir]
                 )
                 .frame(height: 230)
                 .clipShape(RoundedRectangle(cornerRadius: 16))

@@ -16,7 +16,7 @@ struct AboutView: View {
                 }
 
                 Section("How to read the app") {
-                    Label("Near full: 95% or more", systemImage: "drop.fill")
+                    Label("Near full: 85% or more", systemImage: "drop.fill")
                     Label("Low: below 25%", systemImage: "drop")
                     Label("Critically low: below 10%", systemImage: "exclamationmark.triangle.fill")
                     Text("Movement is measured in percentage points so reservoirs of different sizes can be compared fairly.")
