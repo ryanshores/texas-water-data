@@ -119,13 +119,19 @@ struct TexasWaterMapView: UIViewRepresentable {
         }
 
         func mapView(_ mapView: MKMapView, viewFor annotation: MKAnnotation) -> MKAnnotationView? {
+            if let cluster = annotation as? MKClusterAnnotation {
+                return clusterView(for: cluster, in: mapView)
+            }
+
             if let reservoirAnnotation = annotation as? ReservoirAnnotation {
                 let identifier = "reservoir"
                 let view = (mapView.dequeueReusableAnnotationView(withIdentifier: identifier) as? MKMarkerAnnotationView)
                     ?? MKMarkerAnnotationView(annotation: annotation, reuseIdentifier: identifier)
                 view.annotation = annotation
                 view.glyphImage = UIImage(systemName: Self.symbol(for: reservoirAnnotation.reservoir.status))
+                view.glyphText = nil
                 view.markerTintColor = Self.color(for: reservoirAnnotation.reservoir.status)
+                view.clusteringIdentifier = "reservoirs"
                 view.displayPriority = .defaultHigh
                 view.titleVisibility = .hidden
                 view.subtitleVisibility = .hidden
@@ -146,8 +152,74 @@ struct TexasWaterMapView: UIViewRepresentable {
         }
 
         func mapView(_ mapView: MKMapView, didSelect view: MKAnnotationView) {
+            if let cluster = view.annotation as? MKClusterAnnotation {
+                zoom(to: cluster, on: mapView)
+                return
+            }
             guard let annotation = view.annotation as? ReservoirAnnotation else { return }
             onSelectReservoir(annotation.reservoir)
+        }
+
+        private func clusterView(for cluster: MKClusterAnnotation, in mapView: MKMapView) -> MKMarkerAnnotationView {
+            let identifier = "reservoir-cluster"
+            let view = (mapView.dequeueReusableAnnotationView(withIdentifier: identifier) as? MKMarkerAnnotationView)
+                ?? MKMarkerAnnotationView(annotation: cluster, reuseIdentifier: identifier)
+            let reservoirs = cluster.memberAnnotations.compactMap { ($0 as? ReservoirAnnotation)?.reservoir }
+            let percentFull = Self.weightedPercent(for: reservoirs)
+
+            view.annotation = cluster
+            view.glyphImage = nil
+            view.glyphText = "\(reservoirs.count)"
+            view.markerTintColor = Self.color(for: ReservoirStatus.classify(percentFull: percentFull))
+            view.clusteringIdentifier = "reservoirs"
+            view.displayPriority = .required
+            view.canShowCallout = true
+            view.titleVisibility = .hidden
+            view.subtitleVisibility = .hidden
+
+            let summary = UILabel()
+            summary.text = "\(reservoirs.count) reservoirs · \(WaterFormatting.percent(percentFull)) full"
+            summary.font = .preferredFont(forTextStyle: .subheadline)
+            summary.sizeToFit()
+            view.detailCalloutAccessoryView = summary
+            view.accessibilityLabel = "\(reservoirs.count) reservoirs, \(WaterFormatting.percent(percentFull)) full"
+            return view
+        }
+
+        private func zoom(to cluster: MKClusterAnnotation, on mapView: MKMapView) {
+            var rect = MKMapRect.null
+            for member in cluster.memberAnnotations {
+                let coordinate = member.coordinate
+                let point = MKMapPoint(coordinate)
+                rect = rect.union(MKMapRect(origin: point, size: MKMapSize(width: 0, height: 0)))
+            }
+            guard !rect.isNull else { return }
+            mapView.deselectAnnotation(cluster, animated: false)
+            mapView.setVisibleMapRect(
+                rect,
+                edgePadding: UIEdgeInsets(top: 80, left: 60, bottom: 80, right: 60),
+                animated: true
+            )
+        }
+
+        private static func weightedPercent(for reservoirs: [ReservoirSummary]) -> Double? {
+            let paired = reservoirs.compactMap { reservoir -> (storage: Double, capacity: Double)? in
+                guard let storage = reservoir.conservationStorage,
+                      let capacity = reservoir.conservationCapacity,
+                      capacity > 0 else {
+                    return nil
+                }
+                return (storage, capacity)
+            }
+            if !paired.isEmpty {
+                let storage = paired.reduce(0) { $0 + $1.storage }
+                let capacity = paired.reduce(0) { $0 + $1.capacity }
+                if capacity > 0 { return storage / capacity * 100 }
+            }
+
+            let knownPercentages = reservoirs.compactMap(\.percentFull)
+            guard !knownPercentages.isEmpty else { return nil }
+            return knownPercentages.reduce(0, +) / Double(knownPercentages.count)
         }
 
         private static func color(for status: ReservoirStatus) -> UIColor {
