@@ -1,5 +1,6 @@
 import { readDashboard, readHistory, upsertCurrentConditions } from "./database";
 import { fetchDroughtCountyCatalog, fetchDroughtCountyDetail, fetchDroughtSummary } from "./drought";
+import { fetchDroughtHydrologyContext } from "./hydrology";
 import { extractOfficialSlugMap, normalizeSnapshot, slugify } from "./normalize";
 
 const TWDB_CURRENT_URL = "https://waterdatafortexas.org/reservoirs/recent-conditions.json";
@@ -23,6 +24,10 @@ export default {
 
       if (url.pathname === "/v1/drought") {
         return json(await fetchDroughtSummary(), 200, { "Cache-Control": "public, max-age=900" });
+      }
+
+      if (url.pathname === "/v1/drought/context") {
+        return json(await fetchDroughtHydrologyContext(), 200, { "Cache-Control": "public, max-age=900" });
       }
 
       if (url.pathname === "/v1/drought/counties") {

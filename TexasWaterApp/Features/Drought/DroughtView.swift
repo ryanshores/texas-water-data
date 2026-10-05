@@ -19,9 +19,9 @@ struct DroughtView: View {
                 }
             }
             .navigationTitle("Drought")
-            .toolbar { ToolbarItem(placement: .topBarTrailing) { Button { Task { await store.refresh(); await store.load() } } label: { Image(systemName: "arrow.clockwise") }.disabled(store.isLoading) } }
+            .toolbar { ToolbarItem(placement: .topBarTrailing) { Button { Task { await store.refreshAll() } } label: { Image(systemName: "arrow.clockwise") }.disabled(store.isLoading || store.isLoadingHydrologyContext) } }
             .task { await store.load() }
-            .refreshable { await store.refresh(); await store.load() }
+            .refreshable { await store.refreshAll() }
         }
     }
 
@@ -39,6 +39,7 @@ struct DroughtView: View {
 
                 categoryGrid(summary)
                 droughtMap(summary)
+                hydrologyContext
                 countyLookup
                 Text("Week-over-week change").font(.headline).padding(.horizontal)
                 ForEach(["D0", "D1", "D2", "D3", "D4"], id: \.self) { category in
@@ -173,6 +174,26 @@ struct DroughtView: View {
     private func droughtMap(_ summary: DroughtSummary) -> some View {
         DroughtMapView(areas: summary.mapAreas)
             .padding(.horizontal)
+    }
+
+    @ViewBuilder
+    private var hydrologyContext: some View {
+        if let context = store.hydrologyContext {
+            DroughtHydrologyContextView(context: context)
+        } else if store.isLoadingHydrologyContext {
+            HStack(spacing: 10) {
+                ProgressView()
+                Text("Loading soil moisture, streamflow, and drought indices…")
+                    .font(.subheadline)
+                    .foregroundStyle(.secondary)
+            }
+            .padding(.horizontal)
+        } else if let error = store.hydrologyContextErrorMessage {
+            Label(error, systemImage: "wifi.exclamationmark")
+                .font(.footnote)
+                .foregroundStyle(.secondary)
+                .padding(.horizontal)
+        }
     }
 
     private func color(for category: String) -> Color { switch category { case "D4": .purple; case "D3": .red; case "D2": .orange; case "D1": .yellow; case "D0": .mint; default: .blue } }

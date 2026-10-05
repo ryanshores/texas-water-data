@@ -21,6 +21,8 @@ The local API exposes:
 - `GET /v1/reservoirs/:id/history?range=30d|1y`
 - `GET /v1/drought` — statewide D0-D4 percentages, week-over-week deltas, and
   categorized map areas from the TWDB Drought Monitor.
+- `GET /v1/drought/context` — dated soil-moisture and drought-index maps plus
+  a current representative-streamflow summary from TWDB.
 - `GET /v1/drought/counties` — official Texas county catalog for search.
 - `GET /v1/drought/counties/:name` — historical D0-D4 percentages and the
   official boundary for a county.

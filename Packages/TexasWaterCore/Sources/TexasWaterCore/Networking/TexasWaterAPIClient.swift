@@ -30,6 +30,10 @@ public struct TexasWaterAPIClient: Sendable {
         try await decode(path: "v1/drought")
     }
 
+    public func fetchDroughtHydrologyContext() async throws -> DroughtHydrologyContext {
+        try await decode(path: "v1/drought/context")
+    }
+
     public func fetchDroughtCounty(name: String) async throws -> DroughtCountyDetail {
         let encoded = name.addingPercentEncoding(withAllowedCharacters: .urlPathAllowed) ?? name
         return try await decode(path: "v1/drought/counties/\(encoded)")
