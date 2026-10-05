@@ -31,9 +31,12 @@ struct TexasWaterMapView: UIViewRepresentable {
 
     func updateUIView(_ map: MKMapView, context: Context) {
         context.coordinator.onSelectReservoir = onSelectReservoir
-        let contentIdentifier = mapContentIdentifier
-        guard context.coordinator.mapContentIdentifier != contentIdentifier else { return }
-        context.coordinator.mapContentIdentifier = contentIdentifier
+        guard context.coordinator.droughtAreas != droughtAreas
+            || context.coordinator.reservoirs != reservoirs else {
+            return
+        }
+        context.coordinator.droughtAreas = droughtAreas
+        context.coordinator.reservoirs = reservoirs
 
         map.removeOverlays(map.overlays)
         map.removeAnnotations(map.annotations)
@@ -54,21 +57,6 @@ struct TexasWaterMapView: UIViewRepresentable {
                 animated: false
             )
         }
-    }
-
-    private var mapContentIdentifier: String {
-        let droughtIdentifier = droughtAreas
-            .map { "\($0.category):\($0.coordinates.count)" }
-            .sorted()
-            .joined(separator: ",")
-        let reservoirIdentifier = reservoirs
-            .map { reservoir in
-                let percent = reservoir.percentFull.map(String.init) ?? "nil"
-                return "\(reservoir.id):\(reservoir.observedAt):\(percent)"
-            }
-            .sorted()
-            .joined(separator: ",")
-        return "\(droughtIdentifier)|\(reservoirIdentifier)"
     }
 
     private func makePolygons(for area: DroughtMapArea) -> [MKPolygon] {
@@ -103,7 +91,8 @@ struct TexasWaterMapView: UIViewRepresentable {
 
     final class Coordinator: NSObject, MKMapViewDelegate {
         var onSelectReservoir: (ReservoirSummary) -> Void = { _ in }
-        var mapContentIdentifier: String?
+        var droughtAreas: [DroughtMapArea]?
+        var reservoirs: [ReservoirSummary]?
 
         func mapView(_ mapView: MKMapView, rendererFor overlay: MKOverlay) -> MKOverlayRenderer {
             guard let polygon = overlay as? MKPolygon else {
