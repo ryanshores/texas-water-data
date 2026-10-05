@@ -13,6 +13,8 @@ final class DroughtDataStore: ObservableObject {
     @Published private(set) var isLoading = false
     @Published private(set) var errorMessage: String?
     @Published private(set) var countyRecords: [DroughtCountyRecord] = []
+    @Published private(set) var countyDetail: DroughtCountyDetail?
+    @Published private(set) var counties: [DroughtCountyCatalogEntry] = []
     @Published private(set) var isLoadingCounty = false
     @Published private(set) var source: Source = .direct
 
@@ -26,6 +28,7 @@ final class DroughtDataStore: ObservableObject {
     func load() async {
         guard summary == nil, !isLoading else { return }
         await refresh()
+        await loadCountyCatalog()
     }
 
     func refresh() async {
@@ -58,12 +61,23 @@ final class DroughtDataStore: ObservableObject {
         defer { isLoadingCounty = false }
         do {
             if let apiClient {
-                countyRecords = try await apiClient.fetchDroughtCounty(name: name)
+                let detail = try await apiClient.fetchDroughtCounty(name: name)
+                countyDetail = detail
+                countyRecords = detail.records
             } else {
-                countyRecords = try await twdbClient.fetchCounty(named: name)
+                let records = try await twdbClient.fetchCounty(named: name)
+                countyDetail = DroughtCountyDetail(county: name, records: records, boundary: nil)
+                countyRecords = records
             }
         } catch {
-            countyRecords = (try? await twdbClient.fetchCounty(named: name)) ?? []
+            let records = (try? await twdbClient.fetchCounty(named: name)) ?? []
+            countyDetail = records.isEmpty ? nil : DroughtCountyDetail(county: name, records: records, boundary: nil)
+            countyRecords = records
         }
+    }
+
+    private func loadCountyCatalog() async {
+        guard counties.isEmpty, let apiClient else { return }
+        counties = (try? await apiClient.fetchDroughtCountyCatalog()) ?? []
     }
 }

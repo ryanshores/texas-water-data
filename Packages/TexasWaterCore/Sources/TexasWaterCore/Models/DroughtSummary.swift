@@ -43,3 +43,41 @@ public struct DroughtCountyRecord: Codable, Equatable, Sendable, Identifiable {
         ["D4", "D3", "D2", "D1", "D0"].first { (categories[$0] ?? 0) > 0 } ?? "None"
     }
 }
+
+public struct DroughtCountyBoundary: Codable, Equatable, Sendable {
+    public let fips: String
+    public let county: String
+    /// One or more exterior/interior rings, each in longitude/latitude order.
+    public let coordinates: [[[Double]]]
+
+    public init(fips: String, county: String, coordinates: [[[Double]]]) {
+        self.fips = fips
+        self.county = county
+        self.coordinates = coordinates
+    }
+}
+
+public struct DroughtCountyDetail: Codable, Equatable, Sendable {
+    public let county: String
+    public let records: [DroughtCountyRecord]
+    public let boundary: DroughtCountyBoundary?
+
+    public init(county: String, records: [DroughtCountyRecord], boundary: DroughtCountyBoundary?) {
+        self.county = county
+        self.records = records
+        self.boundary = boundary
+    }
+}
+
+public struct DroughtCountyCatalogEntry: Codable, Equatable, Sendable, Identifiable {
+    public let fips: String
+    public let county: String
+
+    public init(fips: String, county: String) {
+        self.fips = fips
+        self.county = county
+    }
+
+    public var id: String { fips }
+    public var queryName: String { county.replacingOccurrences(of: " County", with: "") }
+}

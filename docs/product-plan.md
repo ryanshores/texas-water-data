@@ -160,12 +160,14 @@ Apple Developer Program account is in scope.
 - County status, statewide D0-D4 summary, week-over-week change, and map.
 - Soil moisture, streamflow, and drought-index layers as progressive additions.
 
-**Status: in progress on `feature/phase2-drought`.** The first slice adds a
+**Status: in progress.** The first slice adds a
 read-only `/v1/drought` contract backed by the TWDB Drought Monitor, statewide
 D0-D4 percentages with week-over-week deltas, categorized map areas, a SwiftUI
 Drought tab, and a refreshable source/error state. County history is available
-through `/v1/drought/counties/{county}` for the next slice. Soil moisture,
-streamflow, and richer county boundary rendering remain follow-on work.
+through `/v1/drought/counties/{county}`. The county-detail slice adds the
+official county catalog, searchable selection, six-month D0+/D2+ coverage
+history, and exact TWDB county boundary rendering. Soil moisture, streamflow,
+and additional drought-index layers remain follow-on work.
 
 ### Phase 3 — groundwater and weather context
 

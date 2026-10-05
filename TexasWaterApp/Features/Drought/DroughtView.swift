@@ -1,3 +1,4 @@
+import Charts
 import MapKit
 import SwiftUI
 import TexasWaterCore
@@ -70,15 +71,90 @@ struct DroughtView: View {
                     .disabled(store.isLoadingCounty || countyName.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty)
             }
             if let record = store.countyRecords.last {
-                HStack {
-                    Text(record.county).font(.headline)
-                    Spacer()
-                    Text(record.latestCategory).font(.headline).foregroundStyle(color(for: record.latestCategory))
-                    Text(record.mapDate).foregroundStyle(.secondary)
-                }
+                countyDetail(record)
             }
+            countyMatches
         }
         .padding(.horizontal)
+    }
+
+    @ViewBuilder
+    private var countyMatches: some View {
+        let search = countyName.trimmingCharacters(in: .whitespacesAndNewlines).lowercased()
+        if !search.isEmpty {
+            let matches = store.counties.filter { $0.county.lowercased().contains(search) }
+            if !matches.isEmpty {
+                VStack(alignment: .leading, spacing: 0) {
+                    ForEach(matches.prefix(6)) { county in
+                        Button {
+                            countyName = county.queryName
+                            Task { await store.loadCounty(named: county.queryName) }
+                        } label: {
+                            Text(county.county)
+                                .frame(maxWidth: .infinity, alignment: .leading)
+                                .padding(.vertical, 8)
+                        }
+                        .buttonStyle(.plain)
+                        if county.id != matches.prefix(6).last?.id { Divider() }
+                    }
+                }
+                .padding(.horizontal, 10)
+                .background(.thinMaterial, in: RoundedRectangle(cornerRadius: 12))
+            }
+        }
+    }
+
+    @ViewBuilder
+    private func countyDetail(_ record: DroughtCountyRecord) -> some View {
+        VStack(alignment: .leading, spacing: 12) {
+            HStack {
+                VStack(alignment: .leading) {
+                    Text(record.county).font(.headline)
+                    Text("Week of \(record.mapDate)").font(.caption).foregroundStyle(.secondary)
+                }
+                Spacer()
+                Text(record.latestCategory).font(.title3.bold()).foregroundStyle(color(for: record.latestCategory))
+            }
+            Text("\(record.categories["D0"] ?? 0, specifier: "%.1f")% of county area is abnormally dry or worse")
+                .font(.subheadline)
+            if let boundary = store.countyDetail?.boundary {
+                CountyBoundaryMap(boundary: boundary, color: color(for: record.latestCategory))
+                    .frame(height: 210)
+                    .clipShape(RoundedRectangle(cornerRadius: 12))
+                    .accessibilityLabel("Map of \(record.county)")
+            }
+            countyChart
+        }
+        .padding(14)
+        .background(.thinMaterial, in: RoundedRectangle(cornerRadius: 16))
+    }
+
+    @ViewBuilder
+    private var countyChart: some View {
+        let history = Array(store.countyRecords.suffix(26))
+        if history.count > 1 {
+            VStack(alignment: .leading, spacing: 6) {
+                Text("Six-month drought coverage").font(.subheadline.bold())
+                Chart(history) { item in
+                    if let date = ReservoirHistoryDecoder.parseDate(item.mapDate) {
+                        LineMark(
+                            x: .value("Week", date),
+                            y: .value("D0+ coverage", item.categories["D0"] ?? 0)
+                        )
+                        .foregroundStyle(.orange)
+                        LineMark(
+                            x: .value("Week", date),
+                            y: .value("D2+ coverage", item.categories["D2"] ?? 0)
+                        )
+                        .foregroundStyle(.red)
+                    }
+                }
+                .chartYScale(domain: 0...100)
+                .chartLegend(position: .bottom)
+                .frame(height: 160)
+                Text("Orange: D0+ · Red: D2+").font(.caption2).foregroundStyle(.secondary)
+            }
+        }
     }
 
     private func categoryGrid(_ summary: DroughtSummary) -> some View {

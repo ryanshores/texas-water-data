@@ -35,6 +35,7 @@
 		EAFB21740CA18C0419B3E107 /* BasinListView.swift in Sources */ = {isa = PBXBuildFile; fileRef = ECF799960593C82FFF201FB6 /* BasinListView.swift */; };
 		EF0887DADEA4D4F9A0BB0D86 /* AboutView.swift in Sources */ = {isa = PBXBuildFile; fileRef = AC5867C66D98CC91F235BA62 /* AboutView.swift */; };
 		EF1E6B86AC639AE365B45F43 /* DroughtView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 817A874B6D2087891B61BD22 /* DroughtView.swift */; };
+		F1D086CC54D2DA792528865D /* CountyBoundaryMap.swift in Sources */ = {isa = PBXBuildFile; fileRef = 5F854C04175BFC5EB355565E /* CountyBoundaryMap.swift */; };
 		FD0C6B6D4C90912BE4DECCF4 /* TexasWaterDeepLink.swift in Sources */ = {isa = PBXBuildFile; fileRef = AEFA12EE73D6885B14618981 /* TexasWaterDeepLink.swift */; };
 /* End PBXBuildFile section */
 
@@ -71,6 +72,7 @@
 		53B0EBB49DA8A5E306922489 /* WaterFormatting.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = WaterFormatting.swift; sourceTree = "<group>"; };
 		542C45536EF3929417ECA424 /* LocalAlertManager.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = LocalAlertManager.swift; sourceTree = "<group>"; };
 		5CB01077DA0996E6B571F670 /* ReservoirDataStore.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ReservoirDataStore.swift; sourceTree = "<group>"; };
+		5F854C04175BFC5EB355565E /* CountyBoundaryMap.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CountyBoundaryMap.swift; sourceTree = "<group>"; };
 		61167902E5E3BA12ED34E6D7 /* WaterWidgetCache.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = WaterWidgetCache.swift; sourceTree = "<group>"; };
 		66B91B82B1F2EF5751FF9991 /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist; path = Info.plist; sourceTree = "<group>"; };
 		7AD441C27CD2757019178FA3 /* TexasWater.entitlements */ = {isa = PBXFileReference; lastKnownFileType = text.plist.entitlements; path = TexasWater.entitlements; sourceTree = "<group>"; };
@@ -146,6 +148,7 @@
 		33EF9431565E7083C2146F0C /* Drought */ = {
 			isa = PBXGroup;
 			children = (
+				5F854C04175BFC5EB355565E /* CountyBoundaryMap.swift */,
 				817A874B6D2087891B61BD22 /* DroughtView.swift */,
 			);
 			path = Drought;
@@ -397,6 +400,7 @@
 				0551E5E7043A82AFD06E9CDC /* AppEnvironment.swift in Sources */,
 				EAFB21740CA18C0419B3E107 /* BasinListView.swift in Sources */,
 				1B348E4B9573FFF797C70089 /* ContentView.swift in Sources */,
+				F1D086CC54D2DA792528865D /* CountyBoundaryMap.swift in Sources */,
 				969A6E800C1A83BD1FCBB8C0 /* DashboardCache.swift in Sources */,
 				5EEE9D215138E32A82058369 /* DashboardSection.swift in Sources */,
 				04A0110BFE43943B0B8D744B /* DroughtDataStore.swift in Sources */,
