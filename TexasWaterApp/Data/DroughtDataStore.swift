@@ -62,12 +62,21 @@ final class DroughtDataStore: ObservableObject {
         do {
             if let apiClient {
                 let detail = try await apiClient.fetchDroughtCounty(name: name)
+                if let boundary = detail.boundary {
+                    countyDetail = DroughtCountyDetail(county: detail.county, records: detail.records, boundary: boundary)
+                    countyRecords = detail.records
+                } else if let directDetail = try? await twdbClient.fetchCountyDetail(named: name) {
+                    countyDetail = directDetail
+                    countyRecords = directDetail.records
+                    source = .direct
+                } else {
+                    countyDetail = detail
+                    countyRecords = detail.records
+                }
+            } else {
+                let detail = try await twdbClient.fetchCountyDetail(named: name)
                 countyDetail = detail
                 countyRecords = detail.records
-            } else {
-                let records = try await twdbClient.fetchCounty(named: name)
-                countyDetail = DroughtCountyDetail(county: name, records: records, boundary: nil)
-                countyRecords = records
             }
         } catch {
             countyDetail = try? await twdbClient.fetchCountyDetail(named: name)
