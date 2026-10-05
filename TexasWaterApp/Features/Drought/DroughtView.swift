@@ -5,7 +5,7 @@ import TexasWaterCore
 
 struct DroughtView: View {
     @StateObject private var store = DroughtDataStore()
-    @State private var countyName = ""
+    @State private var selectedCountyID = ""
 
     var body: some View {
         NavigationStack {
@@ -61,47 +61,30 @@ struct DroughtView: View {
     private var countyLookup: some View {
         VStack(alignment: .leading, spacing: 10) {
             Text("County history").font(.headline)
-            HStack {
-                TextField("County name, e.g. Travis", text: $countyName)
-                    .textFieldStyle(.roundedBorder)
-                    .submitLabel(.search)
-                    .onSubmit { Task { await store.loadCounty(named: countyName) } }
-                Button("Check") { Task { await store.loadCounty(named: countyName) } }
-                    .buttonStyle(.borderedProminent)
-                    .disabled(store.isLoadingCounty || countyName.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty)
+            Picker("County", selection: $selectedCountyID) {
+                Text("Select a county").tag("")
+                ForEach(store.counties) { county in
+                    Text(county.county).tag(county.id)
+                }
+            }
+            .pickerStyle(.menu)
+            .tint(.waterBlue)
+            .onChange(of: selectedCountyID) { _, identifier in
+                guard let county = store.counties.first(where: { $0.id == identifier }) else { return }
+                Task { await store.loadCounty(named: county.queryName) }
+            }
+            .disabled(store.counties.isEmpty || store.isLoadingCounty)
+
+            if store.counties.isEmpty {
+                Label("Loading county list…", systemImage: "arrow.triangle.2.circlepath")
+                    .font(.footnote)
+                    .foregroundStyle(.secondary)
             }
             if let record = store.countyRecords.last {
                 countyDetail(record)
             }
-            countyMatches
         }
         .padding(.horizontal)
-    }
-
-    @ViewBuilder
-    private var countyMatches: some View {
-        let search = countyName.trimmingCharacters(in: .whitespacesAndNewlines).lowercased()
-        if !search.isEmpty {
-            let matches = store.counties.filter { $0.county.lowercased().contains(search) }
-            if !matches.isEmpty {
-                VStack(alignment: .leading, spacing: 0) {
-                    ForEach(matches.prefix(6)) { county in
-                        Button {
-                            countyName = county.queryName
-                            Task { await store.loadCounty(named: county.queryName) }
-                        } label: {
-                            Text(county.county)
-                                .frame(maxWidth: .infinity, alignment: .leading)
-                                .padding(.vertical, 8)
-                        }
-                        .buttonStyle(.plain)
-                        if county.id != matches.prefix(6).last?.id { Divider() }
-                    }
-                }
-                .padding(.horizontal, 10)
-                .background(.thinMaterial, in: RoundedRectangle(cornerRadius: 12))
-            }
-        }
     }
 
     @ViewBuilder
