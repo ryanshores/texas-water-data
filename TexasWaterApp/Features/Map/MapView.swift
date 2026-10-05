@@ -2,7 +2,7 @@ import MapKit
 import SwiftUI
 import TexasWaterCore
 
-struct ReservoirMapView: View {
+struct MapView: View {
     @EnvironmentObject private var store: ReservoirDataStore
     @EnvironmentObject private var droughtStore: DroughtDataStore
     @State private var selectedReservoir: ReservoirSummary?

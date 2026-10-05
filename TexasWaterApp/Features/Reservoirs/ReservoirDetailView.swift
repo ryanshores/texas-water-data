@@ -17,6 +17,7 @@ struct ReservoirDetailView: View {
     var body: some View {
         ScrollView {
             VStack(alignment: .leading, spacing: 22) {
+                map
                 overview
                 historySection
                 metrics
@@ -37,6 +38,23 @@ struct ReservoirDetailView: View {
             }
         }
         .task { await store.loadHistory(for: reservoir) }
+    }
+    
+    private var map: some View {
+        VStack(alignment: .leading, spacing: 14) {
+            HStack {
+                TexasWaterMapView(
+                    droughtAreas: [],
+                    reservoirs: [reservoir],
+//                    onSelectReservoir: { selectedReservoir = $0 }
+                )
+                .frame(height: 230)
+                .clipShape(RoundedRectangle(cornerRadius: 16))
+                .accessibilityLabel("Map showing \(reservoir.fullName)")
+            }
+        }
+        .padding(18)
+        .background(.background, in: RoundedRectangle(cornerRadius: 20))
     }
 
     private var overview: some View {

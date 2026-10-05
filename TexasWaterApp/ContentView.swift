@@ -28,7 +28,7 @@ struct ContentView: View {
                 .tabItem { Label("Reservoirs", systemImage: "list.bullet") }
                 .tag(Tab.reservoirs)
 
-            ReservoirMapView()
+            MapView()
                 .tabItem { Label("Map", systemImage: "map") }
                 .tag(Tab.map)
 
