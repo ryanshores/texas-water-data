@@ -180,8 +180,10 @@ Drought tab, and a refreshable source/error state. County history is available
 through `/v1/drought/counties/{county}`. The county-detail slice adds the
 official county catalog, searchable selection, six-month D0+/D2+ coverage
 history, and exact TWDB county boundary rendering. Soil moisture, streamflow,
-and additional drought-index layers remain follow-on work. The next planned
-slice is the Today drought summary integration described above.
+and additional drought-index layers remain follow-on work. The Today
+summary card and shared overview loading are now implemented on the
+`feature/today-drought-summary` branch; county catalog and history loading
+remain scoped to the Drought tab.
 
 ### Phase 3 — groundwater and weather context
 

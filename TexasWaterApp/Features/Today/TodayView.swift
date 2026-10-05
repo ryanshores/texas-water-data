@@ -2,7 +2,13 @@ import SwiftUI
 
 struct TodayView: View {
     @EnvironmentObject private var store: ReservoirDataStore
+    @EnvironmentObject private var droughtStore: DroughtDataStore
+    private let onOpenDrought: () -> Void
     @State private var majorOnly = false
+
+    init(onOpenDrought: @escaping () -> Void = {}) {
+        self.onOpenDrought = onOpenDrought
+    }
 
     var body: some View {
         NavigationStack {
@@ -20,6 +26,8 @@ struct TodayView: View {
                             }
 
                             SummaryHeroCard(dashboard: dashboard, source: store.source)
+
+                            droughtSummary
 
                             Picker("Ranking scope", selection: $majorOnly) {
                                 Text("All reservoirs").tag(false)
@@ -92,7 +100,10 @@ struct TodayView: View {
                         .padding(.horizontal)
                         .padding(.bottom, 24)
                     }
-                    .refreshable { await store.refresh() }
+                    .refreshable {
+                        await store.refresh()
+                        await droughtStore.refresh()
+                    }
                 } else if store.isLoading || store.isRefreshing {
                     ProgressView("Loading Texas water data…")
                 } else {
@@ -106,13 +117,45 @@ struct TodayView: View {
             .navigationTitle("Today")
             .toolbar {
                 ToolbarItem(placement: .topBarTrailing) {
-                    Button { Task { await store.refresh() } } label: {
-                        if store.isRefreshing { ProgressView() } else { Image(systemName: "arrow.clockwise") }
+                    Button { Task { await store.refresh(); await droughtStore.refresh() } } label: {
+                        if store.isRefreshing || droughtStore.isLoading { ProgressView() } else { Image(systemName: "arrow.clockwise") }
                     }
-                    .disabled(store.isRefreshing)
-                    .accessibilityLabel("Refresh water data")
+                    .disabled(store.isRefreshing || droughtStore.isLoading)
+                    .accessibilityLabel("Refresh water and drought data")
                 }
             }
+        }
+    }
+
+    @ViewBuilder
+    private var droughtSummary: some View {
+        if let summary = droughtStore.summary {
+            DroughtTodayCard(summary: summary, source: droughtStore.summarySource, onOpenDetails: onOpenDrought)
+            if let errorMessage = droughtStore.errorMessage {
+                Label("Showing the last available drought update. \(errorMessage)", systemImage: "clock.badge.exclamationmark")
+                    .font(.footnote)
+                    .foregroundStyle(.orange)
+                    .padding(12)
+                    .frame(maxWidth: .infinity, alignment: .leading)
+                    .background(.orange.opacity(0.1), in: RoundedRectangle(cornerRadius: 12))
+            }
+        } else if droughtStore.isLoading {
+            HStack {
+                ProgressView()
+                Text("Loading drought conditions…")
+                    .font(.subheadline)
+                    .foregroundStyle(.secondary)
+            }
+            .frame(maxWidth: .infinity, alignment: .leading)
+            .padding(16)
+            .background(.background, in: RoundedRectangle(cornerRadius: 18))
+        } else {
+            Label(droughtStore.errorMessage ?? "Drought data is unavailable right now.", systemImage: "sun.max.trianglebadge.exclamationmark")
+                .font(.footnote)
+                .foregroundStyle(.secondary)
+                .padding(12)
+                .frame(maxWidth: .infinity, alignment: .leading)
+                .background(.background, in: RoundedRectangle(cornerRadius: 12))
         }
     }
 

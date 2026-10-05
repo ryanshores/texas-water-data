@@ -12,6 +12,7 @@ struct ContentView: View {
     }
 
     @StateObject private var store = ReservoirDataStore()
+    @StateObject private var droughtStore = DroughtDataStore()
     @StateObject private var alerts = LocalAlertManager()
     @ObservedObject private var deepLinkInbox = TexasWaterDeepLinkInbox.shared
     @State private var selectedTab: Tab = .today
@@ -20,7 +21,7 @@ struct ContentView: View {
 
     var body: some View {
         TabView(selection: $selectedTab) {
-            TodayView()
+            TodayView(onOpenDrought: { selectedTab = .drought })
                 .tabItem { Label("Today", systemImage: "drop.fill") }
                 .tag(Tab.today)
 
@@ -46,9 +47,11 @@ struct ContentView: View {
         }
         .tint(Color.waterBlue)
         .environmentObject(store)
+        .environmentObject(droughtStore)
         .environmentObject(alerts)
         .task {
             await store.load()
+            await droughtStore.loadOverview()
             if let url = deepLinkInbox.takePendingURL() {
                 open(url)
             }

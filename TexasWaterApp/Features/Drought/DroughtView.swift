@@ -4,7 +4,7 @@ import SwiftUI
 import TexasWaterCore
 
 struct DroughtView: View {
-    @StateObject private var store = DroughtDataStore()
+    @EnvironmentObject private var store: DroughtDataStore
     @State private var selectedCountyID = ""
 
     var body: some View {

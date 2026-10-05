@@ -16,7 +16,10 @@ final class DroughtDataStore: ObservableObject {
     @Published private(set) var countyDetail: DroughtCountyDetail?
     @Published private(set) var counties: [DroughtCountyCatalogEntry] = []
     @Published private(set) var isLoadingCounty = false
-    @Published private(set) var source: Source = .direct
+    @Published private(set) var summarySource: Source = .direct
+    @Published private(set) var countySource: Source?
+
+    var source: Source { summarySource }
 
     private let apiClient: TexasWaterAPIClient?
     private let twdbClient = TWDroughtClient()
@@ -26,10 +29,13 @@ final class DroughtDataStore: ObservableObject {
         apiClient = AppEnvironment.backendURL.map(TexasWaterAPIClient.init(baseURL:))
     }
 
+    func loadOverview() async {
+        guard summary == nil else { return }
+        await refresh()
+    }
+
     func load() async {
-        if summary == nil {
-            await refresh()
-        }
+        await loadOverview()
         if counties.isEmpty {
             await loadCountyCatalog()
         }
@@ -42,16 +48,16 @@ final class DroughtDataStore: ObservableObject {
         do {
             if let apiClient {
                 summary = try await apiClient.fetchDroughtSummary()
-                source = .backend
+                summarySource = .backend
             } else {
                 summary = try await twdbClient.fetchSummary()
-                source = .direct
+                summarySource = .direct
             }
             errorMessage = nil
         } catch {
             do {
                 summary = try await twdbClient.fetchSummary()
-                source = .direct
+                summarySource = .direct
                 errorMessage = nil
             } catch {
                 errorMessage = "Drought data is unavailable right now. \(error.localizedDescription)"
@@ -69,24 +75,25 @@ final class DroughtDataStore: ObservableObject {
                 if let boundary = detail.boundary {
                     countyDetail = DroughtCountyDetail(county: detail.county, records: detail.records, boundary: boundary)
                     countyRecords = detail.records
-                    source = .backend
+                    countySource = .backend
                 } else if let directDetail = try? await twdbClient.fetchCountyDetail(named: name) {
                     countyDetail = directDetail
                     countyRecords = directDetail.records
-                    source = .direct
+                    countySource = .direct
                 } else {
                     countyDetail = detail
                     countyRecords = detail.records
-                    source = .backend
+                    countySource = .backend
                 }
             } else {
                 let detail = try await twdbClient.fetchCountyDetail(named: name)
                 countyDetail = detail
                 countyRecords = detail.records
+                countySource = .direct
             }
         } catch {
             countyDetail = try? await twdbClient.fetchCountyDetail(named: name)
-            if countyDetail != nil { source = .direct }
+            if countyDetail != nil { countySource = .direct }
             if let countyDetail {
                 countyRecords = countyDetail.records
             } else {
