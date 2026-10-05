@@ -151,7 +151,7 @@ observations have been backfilled, and the app has passed the release-readiness
 checks. Remote APNs delivery and App Store distribution remain deferred until an
 Apple Developer Program account is in scope.
 
-1. Begin Phase 2: drought conditions and county-level context.
+1. Complete Phase 2: drought conditions and county-level context.
 2. Revisit APNs delivery and App Store distribution when an Apple Developer
    Program account is available.
 
@@ -159,6 +159,13 @@ Apple Developer Program account is in scope.
 
 - County status, statewide D0-D4 summary, week-over-week change, and map.
 - Soil moisture, streamflow, and drought-index layers as progressive additions.
+
+**Status: in progress on `feature/phase2-drought`.** The first slice adds a
+read-only `/v1/drought` contract backed by the TWDB Drought Monitor, statewide
+D0-D4 percentages with week-over-week deltas, categorized map areas, a SwiftUI
+Drought tab, and a refreshable source/error state. County history is available
+through `/v1/drought/counties/{county}` for the next slice. Soil moisture,
+streamflow, and richer county boundary rendering remain follow-on work.
 
 ### Phase 3 — groundwater and weather context
 

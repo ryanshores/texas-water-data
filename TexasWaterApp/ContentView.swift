@@ -7,6 +7,7 @@ struct ContentView: View {
         case reservoirs
         case map
         case basins
+        case drought
         case about
     }
 
@@ -34,6 +35,10 @@ struct ContentView: View {
             BasinListView()
                 .tabItem { Label("Basins", systemImage: "water.waves") }
                 .tag(Tab.basins)
+
+            DroughtView()
+                .tabItem { Label("Drought", systemImage: "sun.max") }
+                .tag(Tab.drought)
 
             AboutView()
                 .tabItem { Label("About", systemImage: "info.circle") }
