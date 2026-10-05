@@ -6,6 +6,7 @@ struct ReservoirMapPanel: View {
     let reservoirs: [ReservoirSummary]
     @State private var isExpanded = false
     @State private var selectedReservoir: ReservoirSummary?
+    @State private var expandedSelectedReservoir: ReservoirSummary?
 
     var body: some View {
         VStack(alignment: .leading, spacing: 8) {
@@ -41,7 +42,7 @@ struct ReservoirMapPanel: View {
                 TexasWaterMapView(
                     droughtAreas: [],
                     reservoirs: reservoirs,
-                    onSelectReservoir: { selectedReservoir = $0 }
+                    onSelectReservoir: { expandedSelectedReservoir = $0 }
                 )
                 .ignoresSafeArea(edges: .bottom)
                 .navigationTitle("Reservoir map")
@@ -50,6 +51,18 @@ struct ReservoirMapPanel: View {
                         Button("Done") { isExpanded = false }
                     }
                 }
+            }
+            .sheet(item: $expandedSelectedReservoir) { reservoir in
+                NavigationStack {
+                    ReservoirDetailView(reservoir: reservoir)
+                        .toolbar {
+                            ToolbarItem(placement: .cancellationAction) {
+                                Button("Done") { expandedSelectedReservoir = nil }
+                            }
+                        }
+                }
+                .environmentObject(store)
+                .presentationDetents([.medium, .large])
             }
         }
         .sheet(item: $selectedReservoir) { reservoir in
