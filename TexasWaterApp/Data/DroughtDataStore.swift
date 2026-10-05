@@ -70,14 +70,22 @@ final class DroughtDataStore: ObservableObject {
                 countyRecords = records
             }
         } catch {
-            let records = (try? await twdbClient.fetchCounty(named: name)) ?? []
-            countyDetail = records.isEmpty ? nil : DroughtCountyDetail(county: name, records: records, boundary: nil)
-            countyRecords = records
+            countyDetail = try? await twdbClient.fetchCountyDetail(named: name)
+            if countyDetail != nil { source = .direct }
+            if let countyDetail {
+                countyRecords = countyDetail.records
+            } else {
+                countyRecords = []
+            }
         }
     }
 
     private func loadCountyCatalog() async {
-        guard counties.isEmpty, let apiClient else { return }
-        counties = (try? await apiClient.fetchDroughtCountyCatalog()) ?? []
+        guard counties.isEmpty else { return }
+        if let apiClient, let catalog = try? await apiClient.fetchDroughtCountyCatalog() {
+            counties = catalog
+        } else {
+            counties = (try? await twdbClient.fetchCountyCatalog()) ?? []
+        }
     }
 }
