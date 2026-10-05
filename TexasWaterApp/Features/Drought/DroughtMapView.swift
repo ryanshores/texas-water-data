@@ -31,12 +31,15 @@ struct TexasWaterMapView: UIViewRepresentable {
 
     func updateUIView(_ map: MKMapView, context: Context) {
         context.coordinator.onSelectReservoir = onSelectReservoir
+        let contentIdentifier = mapContentIdentifier
+        guard context.coordinator.mapContentIdentifier != contentIdentifier else { return }
+        context.coordinator.mapContentIdentifier = contentIdentifier
+
         map.removeOverlays(map.overlays)
         map.removeAnnotations(map.annotations)
 
         let polygons = droughtAreas.flatMap { makePolygons(for: $0) }
         map.addOverlays(polygons)
-        map.addAnnotations(droughtAreas.compactMap(makeCategoryAnnotation))
         map.addAnnotations(reservoirs.map(ReservoirAnnotation.init))
 
         var rect = polygons.map(\.boundingMapRect).reduce(MKMapRect.null) { $0.union($1) }
@@ -51,6 +54,21 @@ struct TexasWaterMapView: UIViewRepresentable {
                 animated: false
             )
         }
+    }
+
+    private var mapContentIdentifier: String {
+        let droughtIdentifier = droughtAreas
+            .map { "\($0.category):\($0.coordinates.count)" }
+            .sorted()
+            .joined(separator: ",")
+        let reservoirIdentifier = reservoirs
+            .map { reservoir in
+                let percent = reservoir.percentFull.map(String.init) ?? "nil"
+                return "\(reservoir.id):\(reservoir.observedAt):\(percent)"
+            }
+            .sorted()
+            .joined(separator: ",")
+        return "\(droughtIdentifier)|\(reservoirIdentifier)"
     }
 
     private func makePolygons(for area: DroughtMapArea) -> [MKPolygon] {
@@ -83,27 +101,9 @@ struct TexasWaterMapView: UIViewRepresentable {
         return coordinates.count > 2 ? coordinates : nil
     }
 
-    private func makeCategoryAnnotation(for area: DroughtMapArea) -> MKPointAnnotation? {
-        let points = area.coordinates
-            .flatMap { $0 }
-            .flatMap { $0 }
-            .compactMap { pair -> CLLocationCoordinate2D? in
-                guard pair.count > 1 else { return nil }
-                return CLLocationCoordinate2D(latitude: pair[1], longitude: pair[0])
-            }
-        guard !points.isEmpty else { return nil }
-
-        let annotation = MKPointAnnotation()
-        annotation.title = area.category
-        annotation.coordinate = CLLocationCoordinate2D(
-            latitude: points.map(\.latitude).reduce(0, +) / Double(points.count),
-            longitude: points.map(\.longitude).reduce(0, +) / Double(points.count)
-        )
-        return annotation
-    }
-
     final class Coordinator: NSObject, MKMapViewDelegate {
         var onSelectReservoir: (ReservoirSummary) -> Void = { _ in }
+        var mapContentIdentifier: String?
 
         func mapView(_ mapView: MKMapView, rendererFor overlay: MKOverlay) -> MKOverlayRenderer {
             guard let polygon = overlay as? MKPolygon else {
@@ -139,16 +139,7 @@ struct TexasWaterMapView: UIViewRepresentable {
                 return view
             }
 
-            let identifier = "drought-category"
-            let view = (mapView.dequeueReusableAnnotationView(withIdentifier: identifier) as? MKMarkerAnnotationView)
-                ?? MKMarkerAnnotationView(annotation: annotation, reuseIdentifier: identifier)
-            view.annotation = annotation
-            view.glyphText = (annotation.title ?? nil) ?? "?"
-            view.markerTintColor = Self.color(for: (annotation.title ?? nil))
-            view.displayPriority = .required
-            view.titleVisibility = .hidden
-            view.subtitleVisibility = .hidden
-            return view
+            return nil
         }
 
         func mapView(_ mapView: MKMapView, didSelect view: MKAnnotationView) {
@@ -278,7 +269,7 @@ struct DroughtMapView: View {
                 .clipShape(RoundedRectangle(cornerRadius: 16))
                 .accessibilityLabel("Texas drought map showing all D0 through D4 drought areas")
             HStack {
-                Text("Shaded areas show the full drought footprint. Labels identify each category.")
+                Text("Shaded areas show the full drought footprint. Colors match the categories above.")
                     .font(.caption)
                     .foregroundStyle(.secondary)
                 Spacer()
