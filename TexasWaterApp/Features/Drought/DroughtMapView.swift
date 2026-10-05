@@ -117,9 +117,13 @@ struct TexasWaterMapView: UIViewRepresentable {
                 let view = (mapView.dequeueReusableAnnotationView(withIdentifier: identifier) as? MKMarkerAnnotationView)
                     ?? MKMarkerAnnotationView(annotation: annotation, reuseIdentifier: identifier)
                 view.annotation = annotation
-                view.glyphImage = UIImage(systemName: Self.symbol(for: reservoirAnnotation.reservoir.status))
+                let status = reservoirAnnotation.reservoir.status
+                view.glyphImage = Self.glyphImage(
+                    for: reservoirAnnotation.reservoir.percentFull,
+                    color: Self.color(for: status)
+                )
                 view.glyphText = nil
-                view.markerTintColor = Self.color(for: reservoirAnnotation.reservoir.status)
+                view.markerTintColor = Self.color(for: status)
                 view.clusteringIdentifier = "reservoirs"
                 view.displayPriority = .defaultHigh
                 view.titleVisibility = .hidden
@@ -212,14 +216,26 @@ struct TexasWaterMapView: UIViewRepresentable {
             }
         }
 
-        private static func symbol(for status: ReservoirStatus) -> String {
-            switch status {
-            case .nearFull: return "drop.fill"
-            case .normal: return "drop.halffull"
-            case .low: return "drop"
-            case .critical: return "exclamationmark.triangle.fill"
-            case .unavailable: return "questionmark.circle"
+        private static func glyphImage(for percentFull: Double?, color: UIColor) -> UIImage? {
+            let hierarchicalConfiguration = UIImage.SymbolConfiguration(hierarchicalColor: color)
+            let configuration: UIImage.SymbolConfiguration
+            if #available(iOS 26.0, *) {
+                configuration = hierarchicalConfiguration.applying(
+                    UIImage.SymbolConfiguration(colorRenderingMode: .gradient)
+                )
+            } else {
+                configuration = hierarchicalConfiguration
             }
+
+            guard let percentFull else {
+                return UIImage(systemName: "drop.circle", withConfiguration: configuration)
+            }
+            let variableValue = min(max(percentFull / 100, 0), 1)
+            return UIImage(
+                systemName: "drop.circle",
+                variableValue: variableValue,
+                configuration: configuration
+            )
         }
 
         private static func color(for category: String?) -> UIColor {
