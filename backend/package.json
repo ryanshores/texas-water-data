@@ -5,8 +5,10 @@
   "type": "module",
   "scripts": {
     "check": "wrangler types --check && tsc --noEmit && vitest run",
+    "deploy": "bash scripts/deploy.sh",
     "dev": "wrangler dev --local --test-scheduled",
     "backfill:history": "node scripts/backfill-history.mjs",
+    "health": "bash scripts/health.sh",
     "test": "vitest run",
     "types": "wrangler types"
   },

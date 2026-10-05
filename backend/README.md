@@ -14,6 +14,26 @@ npx wrangler d1 migrations apply texas-water --local
 npm run dev
 ```
 
+For an authenticated production deployment, use the interactive deployment
+flow. It installs dependencies, runs the checks, pauses for Wrangler account
+confirmation, shows remote migration state, asks before applying migrations,
+and asks for confirmation immediately before deployment:
+
+```sh
+npm run deploy
+```
+
+After deployment, verify the public Worker and all JSON routes with:
+
+```sh
+npm run health
+# or: TEXAS_WATER_API_BASE_URL=https://your-worker.example.com npm run health
+```
+
+The deploy flow can remind you to run the scheduled ingestion from the
+Cloudflare dashboard. Wrangler does not provide a production scheduled-event
+invoke command for this Worker.
+
 The local API exposes:
 
 - `GET /health`
@@ -21,6 +41,8 @@ The local API exposes:
 - `GET /v1/reservoirs/:id/history?range=30d|1y`
 - `GET /v1/drought` — statewide D0-D4 percentages, week-over-week deltas, and
   categorized map areas from the TWDB Drought Monitor.
+- `GET /v1/drought/context` — dated soil-moisture and drought-index maps plus
+  a current representative-streamflow summary from TWDB.
 - `GET /v1/drought/counties` — official Texas county catalog for search.
 - `GET /v1/drought/counties/:name` — historical D0-D4 percentages and the
   official boundary for a county.

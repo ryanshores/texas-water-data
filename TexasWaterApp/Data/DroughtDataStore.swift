@@ -16,8 +16,12 @@ final class DroughtDataStore: ObservableObject {
     @Published private(set) var countyDetail: DroughtCountyDetail?
     @Published private(set) var counties: [DroughtCountyCatalogEntry] = []
     @Published private(set) var isLoadingCounty = false
+    @Published private(set) var hydrologyContext: DroughtHydrologyContext?
+    @Published private(set) var isLoadingHydrologyContext = false
     @Published private(set) var summarySource: Source = .direct
     @Published private(set) var countySource: Source?
+    @Published private(set) var hydrologyContextSource: Source?
+    @Published private(set) var hydrologyContextErrorMessage: String?
 
     var source: Source { summarySource }
 
@@ -36,9 +40,11 @@ final class DroughtDataStore: ObservableObject {
 
     func load() async {
         await loadOverview()
+        async let hydrology: Void = loadHydrologyContext()
         if counties.isEmpty {
             await loadCountyCatalog()
         }
+        await hydrology
     }
 
     func refresh() async {
@@ -62,6 +68,45 @@ final class DroughtDataStore: ObservableObject {
             } catch {
                 errorMessage = "Drought data is unavailable right now. \(error.localizedDescription)"
             }
+        }
+    }
+
+    func loadHydrologyContext() async {
+        guard hydrologyContext == nil else { return }
+        await refreshHydrologyContext()
+    }
+
+    func refreshHydrologyContext() async {
+        guard !isLoadingHydrologyContext else { return }
+        isLoadingHydrologyContext = true
+        defer { isLoadingHydrologyContext = false }
+        do {
+            if let apiClient {
+                hydrologyContext = try await apiClient.fetchDroughtHydrologyContext()
+                hydrologyContextSource = .backend
+            } else {
+                hydrologyContext = try await twdbClient.fetchHydrologyContext()
+                hydrologyContextSource = .direct
+            }
+            hydrologyContextErrorMessage = nil
+        } catch {
+            do {
+                hydrologyContext = try await twdbClient.fetchHydrologyContext()
+                hydrologyContextSource = .direct
+                hydrologyContextErrorMessage = nil
+            } catch {
+                hydrologyContextErrorMessage = "Drought context is unavailable right now. \(error.localizedDescription)"
+            }
+        }
+    }
+
+    func refreshAll() async {
+        async let overview: Void = refresh()
+        async let hydrology: Void = refreshHydrologyContext()
+        await overview
+        await hydrology
+        if counties.isEmpty {
+            await loadCountyCatalog()
         }
     }
 

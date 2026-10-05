@@ -12,6 +12,10 @@ public struct TWDroughtClient: Sendable {
     private let stateURL = URL(string: "https://waterdatafortexas.org/drought/api/drought-monitor/data/state/tx")!
     private let geoURL = URL(string: "https://waterdatafortexas.org/drought/api/drought-monitor/geo")!
     private let countiesURL = URL(string: "https://waterdatafortexas.org/drought/api/geometries/counties")!
+    private let soilMoistureDateURL = URL(string: "https://waterdatafortexas.org/drought/api/soil-moisture/map/current-map-date")!
+    private let streamflowInfoURL = URL(string: "https://waterdatafortexas.org/drought/streamflow/daily/info")!
+    private let quickDRIDateURL = URL(string: "https://waterdatafortexas.org/drought/api/quick-drought-response-index/current-map-date")!
+    private let eddiDateURL = URL(string: "https://waterdatafortexas.org/drought/api/evaporative-demand-drought-index/map/current-map-date")!
 
     public init() {}
 
@@ -82,6 +86,65 @@ public struct TWDroughtClient: Sendable {
         )
     }
 
+    public func fetchHydrologyContext() async throws -> DroughtHydrologyContext {
+        async let soilMoistureDate = decode(String.self, from: soilMoistureDateURL)
+        async let streamflowInfo = decode(StreamflowInfo.self, from: streamflowInfoURL)
+        async let quickDRIDate = decode(String.self, from: quickDRIDateURL)
+        async let eddiDate = decode(String.self, from: eddiDateURL)
+
+        let info = try await streamflowInfo
+        guard let observedAt = info.time.end, Self.isISODate(observedAt) else {
+            throw TexasWaterAPIError.invalidResponse
+        }
+        var streamflowURL = URL(string: "https://waterdatafortexas.org/drought/streamflow/daily/data")!
+        streamflowURL.append(queryItems: [
+            URLQueryItem(name: "start", value: observedAt),
+            URLQueryItem(name: "end", value: observedAt),
+        ])
+        async let streamflowData = decode(StreamflowPayload.self, from: streamflowURL)
+
+        let soilDate = try await soilMoistureDate
+        let quickDate = try await quickDRIDate
+        let eddiMapDate = try await eddiDate
+        guard Self.isISODate(soilDate), Self.isISODate(quickDate), Self.isISODate(eddiMapDate) else {
+            throw TexasWaterAPIError.invalidResponse
+        }
+
+        return DroughtHydrologyContext(
+            soilMoisture: Self.rasterLayer(
+                id: "soil-moisture",
+                title: "Root-zone soil moisture",
+                mapDate: soilDate,
+                mapPath: "api/soil-moisture/map/\(soilDate)",
+                description: "SMAP root-zone soil moisture, estimated for the top meter of soil. Values are volumetric water content, not a drought category.",
+                sourceURL: "https://waterdatafortexas.org/drought/soil-moisture"
+            ),
+            streamflow: Self.streamflowSummary(
+                payload: try await streamflowData,
+                observedAt: observedAt,
+                sourceName: info.source?.name ?? "TWDB Surface Water Resources Division"
+            ),
+            indices: [
+                Self.rasterLayer(
+                    id: "quickdri",
+                    title: "QuickDRI",
+                    mapDate: quickDate,
+                    mapPath: "api/quick-drought-response-index/map/\(quickDate)",
+                    description: "A weekly indicator for rapid-onset, or flash, drought and short-term landscape dryness.",
+                    sourceURL: "https://waterdatafortexas.org/drought/quick-drought-response-index"
+                ),
+                Self.rasterLayer(
+                    id: "eddi-1-month",
+                    title: "Evaporative demand drought index",
+                    mapDate: eddiMapDate,
+                    mapPath: "api/evaporative-demand-drought-index/map/\(eddiMapDate)/1-month",
+                    description: "One-month EDDI shows unusual atmospheric thirst; warmer drought colors indicate higher evaporative demand.",
+                    sourceURL: "https://waterdatafortexas.org/drought/evaporative-demand-drought-index"
+                ),
+            ]
+        )
+    }
+
     private func data(from url: URL) async throws -> Data {
         var request = URLRequest(url: url)
         request.timeoutInterval = 30
@@ -91,6 +154,10 @@ public struct TWDroughtClient: Sendable {
             throw TexasWaterAPIError.invalidResponse
         }
         return data
+    }
+
+    private func decode<Value: Decodable>(_ type: Value.Type, from url: URL) async throws -> Value {
+        try JSONDecoder().decode(type, from: try await data(from: url))
     }
 
     private func formattedDate(_ value: String) -> String {
@@ -104,6 +171,93 @@ public struct TWDroughtClient: Sendable {
         Dictionary(uniqueKeysWithValues: ["None", "D0", "D1", "D2", "D3", "D4"].map { key in
             (key, previous.map { (current[key] ?? 0) - ($0[key] ?? 0) })
         })
+    }
+
+    private static func rasterLayer(
+        id: String,
+        title: String,
+        mapDate: String,
+        mapPath: String,
+        description: String,
+        sourceURL: String
+    ) -> DroughtRasterLayer {
+        DroughtRasterLayer(
+            id: id,
+            title: title,
+            mapDate: mapDate,
+            mapURL: "https://waterdatafortexas.org/drought/\(mapPath)",
+            description: description,
+            sourceName: "Water Data for Texas",
+            sourceURL: sourceURL
+        )
+    }
+
+    private static func streamflowSummary(
+        payload: StreamflowPayload,
+        observedAt: String,
+        sourceName: String
+    ) -> StreamflowSummary {
+        let values = (payload.data?.value ?? []).compactMap(\.value).filter { $0.isFinite }
+        let sorted = values.sorted()
+        let median: Double?
+        if sorted.isEmpty {
+            median = nil
+        } else if sorted.count.isMultiple(of: 2) {
+            median = (sorted[sorted.count / 2 - 1] + sorted[sorted.count / 2]) / 2
+        } else {
+            median = sorted[sorted.count / 2]
+        }
+        return StreamflowSummary(
+            observedAt: observedAt,
+            gaugeCount: values.count,
+            medianPercentile: median.map { ($0 * 100).rounded() / 100 },
+            belowNormalGaugeCount: values.filter { $0 < 25 }.count,
+            aboveNormalGaugeCount: values.filter { $0 > 75 }.count,
+            sourceName: sourceName,
+            sourceURL: "https://waterdatafortexas.org/drought/streamflow-percentiles/gauges"
+        )
+    }
+
+    private static func isISODate(_ value: String) -> Bool {
+        value.range(of: #"^\d{4}-\d{2}-\d{2}$"#, options: .regularExpression) != nil
+    }
+}
+
+private struct StreamflowInfo: Decodable {
+    let time: StreamflowTime
+    let source: StreamflowSource?
+}
+
+private struct StreamflowTime: Decodable {
+    let end: String?
+}
+
+private struct StreamflowSource: Decodable {
+    let name: String?
+}
+
+private struct StreamflowPayload: Decodable {
+    let data: StreamflowValues?
+}
+
+private struct StreamflowValues: Decodable {
+    let value: [LossyDouble]?
+}
+
+private struct LossyDouble: Decodable {
+    let value: Double?
+
+    init(from decoder: Decoder) throws {
+        let container = try decoder.singleValueContainer()
+        if container.decodeNil() {
+            value = nil
+        } else if let number = try? container.decode(Double.self) {
+            value = number
+        } else if let text = try? container.decode(String.self) {
+            value = Double(text.trimmingCharacters(in: .whitespacesAndNewlines))
+        } else {
+            value = nil
+        }
     }
 }
 

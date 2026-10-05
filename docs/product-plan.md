@@ -156,13 +156,15 @@ MapKit, SwiftData, WidgetKit, App Intents, and BackgroundTasks.
 
 Phase 0, Phase 1, Phase 1.1, and Phase 1.2 are complete for local development.
 The production Worker is deployed, the app is configured to use it, historical
-observations have been backfilled, and the app has passed the release-readiness
-checks. Remote APNs delivery and App Store distribution remain deferred until an
+observations have been backfilled, and core implementation work is ready for
+the next product phase. Comprehensive validation, remote APNs delivery, and App
+Store distribution are intentionally deferred until later, including when an
 Apple Developer Program account is in scope.
 
-1. Complete Phase 2: drought conditions and county-level context.
-2. Revisit APNs delivery and App Store distribution when an Apple Developer
-   Program account is available.
+1. Merge and deploy the Phase 2 hydrology-context slice.
+2. Begin Phase 3 groundwater and weather context.
+3. Revisit validation, APNs delivery, and App Store distribution when an Apple
+   Developer Program account is available.
 
 ### Phase 2 — drought
 
@@ -180,23 +182,33 @@ Apple Developer Program account is in scope.
   for the key percentages and changes.
 - Soil moisture, streamflow, and drought-index layers as progressive additions.
 
-**Status: in progress.** The first slice adds a
+**Status: implementation complete after the hydrology-context slice merges.** The first slice adds a
 read-only `/v1/drought` contract backed by the TWDB Drought Monitor, statewide
 D0-D4 percentages with week-over-week deltas, categorized map areas, a SwiftUI
 Drought tab, and a refreshable source/error state. County history is available
 through `/v1/drought/counties/{county}`. The county-detail slice adds the
 official county catalog, searchable selection, six-month D0+/D2+ coverage
-history, and exact TWDB county boundary rendering. Soil moisture, streamflow,
-and additional drought-index layers remain follow-on work. The Today
-summary card and shared overview loading are now implemented on the
-`feature/today-drought-summary` branch; county catalog and history loading
-remain scoped to the Drought tab.
+history, and exact TWDB county boundary rendering. The Today
+summary card and shared overview loading are implemented; county catalog and
+history loading remain scoped to the Drought tab. The final implementation slice adds dated
+SMAP root-zone soil-moisture imagery, the TWDB/USGS representative streamflow
+percentile summary, and QuickDRI and one-month EDDI layers. Each raster keeps
+its official source link and legend available from the app.
 
 ### Phase 3 — groundwater and weather context
 
 - Favorite and nearby monitoring wells.
 - Aquifer/county filters and correctly oriented water-table trends.
 - Reservoir rainfall/evaporation and optional TexMesonet context.
+
+### Deferred validation and release
+
+Return to these after the remaining product phases, or when an Apple Developer
+Program account is available:
+
+- Device QA, Dynamic Type, VoiceOver, high-contrast, and non-color status QA.
+- Full upstream/live-contract smoke testing and release-readiness review.
+- Remote APNs delivery, TestFlight, and App Store distribution.
 
 ## Release gates
 
