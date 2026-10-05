@@ -11,6 +11,7 @@ import FoundationNetworking
 public struct TWDroughtClient: Sendable {
     private let stateURL = URL(string: "https://waterdatafortexas.org/drought/api/drought-monitor/data/state/tx")!
     private let geoURL = URL(string: "https://waterdatafortexas.org/drought/api/drought-monitor/geo")!
+    private let countiesURL = URL(string: "https://waterdatafortexas.org/drought/api/geometries/counties")!
 
     public init() {}
 
@@ -57,6 +58,28 @@ public struct TWDroughtClient: Sendable {
                 categories: $0.categories
             )
         }
+    }
+
+    public func fetchCountyCatalog() async throws -> [DroughtCountyCatalogEntry] {
+        let topology = try JSONDecoder().decode(CountyTopology.self, from: try await data(from: countiesURL))
+        return topology.geometries.compactMap { geometry in
+            guard let fips = geometry.id, let county = geometry.properties.name else { return nil }
+            return DroughtCountyCatalogEntry(fips: fips, county: county)
+        }
+        .sorted { $0.county < $1.county }
+    }
+
+    public func fetchCountyDetail(named name: String) async throws -> DroughtCountyDetail {
+        async let records = fetchCounty(named: name)
+        async let topologyData = data(from: countiesURL)
+        let countyRecords = try await records
+        let topology = try JSONDecoder().decode(CountyTopology.self, from: try await topologyData)
+        let canonicalName = countyRecords.last?.county ?? "\(name.trimmingCharacters(in: .whitespacesAndNewlines)) County"
+        return DroughtCountyDetail(
+            county: name,
+            records: countyRecords,
+            boundary: topology.boundary(named: canonicalName)
+        )
     }
 
     private func data(from url: URL) async throws -> Data {
@@ -160,4 +183,97 @@ private struct GeoProperties: Decodable {
 
 private struct GeoGeometry: Decodable {
     let coordinates: [[[[Double]]]]?
+}
+
+private struct CountyTopology: Decodable {
+    let transform: CountyTopologyTransform
+    let arcs: [[[Double]]]
+    let objects: CountyTopologyObjects
+
+    var geometries: [CountyTopologyGeometry] {
+        objects.counties.geometries
+    }
+
+    func boundary(named county: String) -> DroughtCountyBoundary? {
+        guard let geometry = geometries.first(where: { $0.properties.name?.caseInsensitiveCompare(county) == .orderedSame }),
+              let fips = geometry.id,
+              let rings = geometry.arcs else {
+            return nil
+        }
+        let coordinates = rings.map(joinArcs)
+        guard !coordinates.isEmpty else { return nil }
+        return DroughtCountyBoundary(fips: fips, county: county, coordinates: coordinates)
+    }
+
+    private func joinArcs(_ indices: [Int]) -> [[Double]] {
+        var ring: [[Double]] = []
+        for index in indices {
+            let arcIndex = index < 0 ? -index - 1 : index
+            guard arcs.indices.contains(arcIndex) else { continue }
+            let decoded = decode(arcs[arcIndex])
+            let oriented = index < 0 ? Array(decoded.reversed()) : decoded
+            if ring.isEmpty {
+                ring.append(contentsOf: oriented)
+            } else {
+                ring.append(contentsOf: oriented.dropFirst())
+            }
+        }
+        return ring
+    }
+
+    private func decode(_ arc: [[Double]]) -> [[Double]] {
+        var x = 0.0
+        var y = 0.0
+        return arc.compactMap { point in
+            guard point.count > 1 else { return nil }
+            x += point[0]
+            y += point[1]
+            return [
+                x * transform.scale[0] + transform.translate[0],
+                y * transform.scale[1] + transform.translate[1],
+            ]
+        }
+    }
+}
+
+private struct CountyTopologyTransform: Decodable {
+    let scale: [Double]
+    let translate: [Double]
+}
+
+private struct CountyTopologyObjects: Decodable {
+    let counties: CountyTopologyObject
+}
+
+private struct CountyTopologyObject: Decodable {
+    let geometries: [CountyTopologyGeometry]
+}
+
+private struct CountyTopologyGeometry: Decodable {
+    let id: String?
+    let properties: CountyTopologyProperties
+    let arcs: [[Int]]?
+
+    enum CodingKeys: String, CodingKey {
+        case id
+        case properties
+        case arcs
+    }
+
+    init(from decoder: Decoder) throws {
+        let container = try decoder.container(keyedBy: CodingKeys.self)
+        id = try container.decodeIfPresent(String.self, forKey: .id)
+        properties = try container.decode(CountyTopologyProperties.self, forKey: .properties)
+        if let polygon = try? container.decode([[Int]].self, forKey: .arcs) {
+            arcs = polygon
+        } else if let multiPolygon = try? container.decode([[[Int]]].self, forKey: .arcs) {
+            arcs = multiPolygon.flatMap { $0 }
+        } else {
+            arcs = nil
+        }
+    }
+}
+
+private struct CountyTopologyProperties: Decodable {
+    let name: String?
 }

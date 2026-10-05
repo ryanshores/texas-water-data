@@ -1,10 +1,11 @@
+import Charts
 import MapKit
 import SwiftUI
 import TexasWaterCore
 
 struct DroughtView: View {
     @StateObject private var store = DroughtDataStore()
-    @State private var countyName = ""
+    @State private var selectedCountyID = ""
 
     var body: some View {
         NavigationStack {
@@ -18,9 +19,9 @@ struct DroughtView: View {
                 }
             }
             .navigationTitle("Drought")
-            .toolbar { ToolbarItem(placement: .topBarTrailing) { Button { Task { await store.refresh() } } label: { Image(systemName: "arrow.clockwise") }.disabled(store.isLoading) } }
+            .toolbar { ToolbarItem(placement: .topBarTrailing) { Button { Task { await store.refresh(); await store.load() } } label: { Image(systemName: "arrow.clockwise") }.disabled(store.isLoading) } }
             .task { await store.load() }
-            .refreshable { await store.refresh() }
+            .refreshable { await store.refresh(); await store.load() }
         }
     }
 
@@ -60,25 +61,104 @@ struct DroughtView: View {
     private var countyLookup: some View {
         VStack(alignment: .leading, spacing: 10) {
             Text("County history").font(.headline)
-            HStack {
-                TextField("County name, e.g. Travis", text: $countyName)
-                    .textFieldStyle(.roundedBorder)
-                    .submitLabel(.search)
-                    .onSubmit { Task { await store.loadCounty(named: countyName) } }
-                Button("Check") { Task { await store.loadCounty(named: countyName) } }
-                    .buttonStyle(.borderedProminent)
-                    .disabled(store.isLoadingCounty || countyName.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty)
+            Picker("County", selection: $selectedCountyID) {
+                Text("Select a county").tag("")
+                ForEach(store.counties) { county in
+                    Text(county.county).tag(county.id)
+                }
+            }
+            .pickerStyle(.menu)
+            .tint(.waterBlue)
+            .onChange(of: selectedCountyID) { _, identifier in
+                guard let county = store.counties.first(where: { $0.id == identifier }) else { return }
+                Task { await store.loadCounty(named: county.queryName) }
+            }
+            .disabled(store.counties.isEmpty || store.isLoadingCounty)
+
+            if store.counties.isEmpty {
+                Label("Loading county list…", systemImage: "arrow.triangle.2.circlepath")
+                    .font(.footnote)
+                    .foregroundStyle(.secondary)
             }
             if let record = store.countyRecords.last {
-                HStack {
-                    Text(record.county).font(.headline)
-                    Spacer()
-                    Text(record.latestCategory).font(.headline).foregroundStyle(color(for: record.latestCategory))
-                    Text(record.mapDate).foregroundStyle(.secondary)
-                }
+                countyDetail(record)
             }
         }
         .padding(.horizontal)
+    }
+
+    @ViewBuilder
+    private func countyDetail(_ record: DroughtCountyRecord) -> some View {
+        VStack(alignment: .leading, spacing: 12) {
+            HStack {
+                VStack(alignment: .leading) {
+                    Text(record.county).font(.headline)
+                    Text("Week of \(record.mapDate)").font(.caption).foregroundStyle(.secondary)
+                }
+                Spacer()
+                Text(record.latestCategory).font(.title3.bold()).foregroundStyle(color(for: record.latestCategory))
+            }
+            Text("\(record.categories["D0"] ?? 0, specifier: "%.1f")% of county area is abnormally dry or worse")
+                .font(.subheadline)
+            if let boundary = store.countyDetail?.boundary {
+                CountyBoundaryMap(boundary: boundary, color: color(for: record.latestCategory))
+                    .frame(height: 210)
+                    .clipShape(RoundedRectangle(cornerRadius: 12))
+                    .accessibilityLabel("Map of \(record.county)")
+            }
+            countyChart
+        }
+        .padding(14)
+        .background(.thinMaterial, in: RoundedRectangle(cornerRadius: 16))
+    }
+
+    @ViewBuilder
+    private var countyChart: some View {
+        let history = Array(store.countyRecords.suffix(26))
+        if history.count > 1 {
+            VStack(alignment: .leading, spacing: 6) {
+                Text("Six-month drought coverage").font(.subheadline.bold())
+                Chart(history) { item in
+                    if let date = ReservoirHistoryDecoder.parseDate(item.mapDate) {
+                        LineMark(
+                            x: .value("Week", date),
+                            y: .value("D0+ coverage", item.categories["D0"] ?? 0)
+                        )
+                        .interpolationMethod(.catmullRom)
+                        .foregroundStyle(by: .value("Drought threshold", "D0+"))
+                        LineMark(
+                            x: .value("Week", date),
+                            y: .value("D2+ coverage", item.categories["D2"] ?? 0)
+                        )
+                        .interpolationMethod(.catmullRom)
+                        .foregroundStyle(by: .value("Drought threshold", "D2+"))
+                    }
+                }
+                .chartYScale(domain: 0...100)
+                .chartForegroundStyleScale(["D0+": .orange, "D2+": .red])
+                .chartYAxis {
+                    AxisMarks(position: .leading, values: [0, 25, 50, 75, 100]) { value in
+                        AxisGridLine()
+                        AxisTick()
+                        AxisValueLabel {
+                            if let percent = value.as(Double.self) {
+                                Text("\(percent.formatted(.number.precision(.fractionLength(0))))%")
+                            }
+                        }
+                    }
+                }
+                .chartYAxisLabel("County area in drought", position: .leading)
+                .chartLegend(position: .bottom, alignment: .leading)
+                .frame(height: 160)
+                VStack(alignment: .leading, spacing: 4) {
+                    Text("How to read this chart").font(.caption.bold())
+                    Text("D0+ (orange) is the percent of county area that is abnormally dry or worse. D2+ (red) is the percent in severe drought or worse. The status badge above is the current highest category affecting any part of the county; it is a status label, not a third line.")
+                }
+                .font(.caption)
+                .foregroundStyle(.secondary)
+                .accessibilityElement(children: .combine)
+            }
+        }
     }
 
     private func categoryGrid(_ summary: DroughtSummary) -> some View {

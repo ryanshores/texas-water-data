@@ -12,6 +12,11 @@ after the core experience is reliable.
 ### Today
 
 - Statewide percent full with 1-day, 7-day, 30-day, and 1-year changes.
+- Compact statewide drought summary below the reservoir hero: D0+ coverage,
+  D2+ coverage, current highest drought category, week-over-week movement,
+  observation date, and source attribution. A single action opens the Drought
+  tab for the map and county history; county selection and the full history
+  chart stay out of Today.
 - Favorite reservoirs.
 - Fastest rising and fastest falling reservoirs.
 - Near-full, low, and critically low reservoirs.
@@ -158,14 +163,25 @@ Apple Developer Program account is in scope.
 ### Phase 2 — drought
 
 - County status, statewide D0-D4 summary, week-over-week change, and map.
+- Integrate the statewide drought summary into Today without loading the county
+  catalog there. ContentView owns one shared DroughtDataStore; Today loads only
+  the lightweight overview, while the Drought tab loads the county catalog and
+  detail history on demand. Reservoir and drought refreshes remain independent
+  so a drought outage does not hide reservoir data.
+- Provide loading, stale-data, and error states for the Today card, preserve
+  the last successful drought overview, and expose a combined VoiceOver label
+  for the key percentages and changes.
 - Soil moisture, streamflow, and drought-index layers as progressive additions.
 
-**Status: in progress on `feature/phase2-drought`.** The first slice adds a
+**Status: in progress.** The first slice adds a
 read-only `/v1/drought` contract backed by the TWDB Drought Monitor, statewide
 D0-D4 percentages with week-over-week deltas, categorized map areas, a SwiftUI
 Drought tab, and a refreshable source/error state. County history is available
-through `/v1/drought/counties/{county}` for the next slice. Soil moisture,
-streamflow, and richer county boundary rendering remain follow-on work.
+through `/v1/drought/counties/{county}`. The county-detail slice adds the
+official county catalog, searchable selection, six-month D0+/D2+ coverage
+history, and exact TWDB county boundary rendering. Soil moisture, streamflow,
+and additional drought-index layers remain follow-on work. The next planned
+slice is the Today drought summary integration described above.
 
 ### Phase 3 — groundwater and weather context
 

@@ -30,10 +30,14 @@ public struct TexasWaterAPIClient: Sendable {
         try await decode(path: "v1/drought")
     }
 
-    public func fetchDroughtCounty(name: String) async throws -> [DroughtCountyRecord] {
+    public func fetchDroughtCounty(name: String) async throws -> DroughtCountyDetail {
         let encoded = name.addingPercentEncoding(withAllowedCharacters: .urlPathAllowed) ?? name
-        let payload: CountyPayload = try await decode(path: "v1/drought/counties/\(encoded)")
-        return payload.records
+        return try await decode(path: "v1/drought/counties/\(encoded)")
+    }
+
+    public func fetchDroughtCountyCatalog() async throws -> [DroughtCountyCatalogEntry] {
+        let payload: CountyCatalogPayload = try await decode(path: "v1/drought/counties")
+        return payload.counties
     }
 
     public func fetchHistory(reservoirID: String, range: String = "1y") async throws -> [ReservoirObservation] {
@@ -80,7 +84,7 @@ public struct TexasWaterAPIClient: Sendable {
         let deadPoolCapacity: Double?
     }
 
-    private struct CountyPayload: Decodable, Sendable {
-        let records: [DroughtCountyRecord]
+    private struct CountyCatalogPayload: Decodable, Sendable {
+        let counties: [DroughtCountyCatalogEntry]
     }
 }

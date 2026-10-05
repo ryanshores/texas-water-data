@@ -13,19 +13,26 @@ final class DroughtDataStore: ObservableObject {
     @Published private(set) var isLoading = false
     @Published private(set) var errorMessage: String?
     @Published private(set) var countyRecords: [DroughtCountyRecord] = []
+    @Published private(set) var countyDetail: DroughtCountyDetail?
+    @Published private(set) var counties: [DroughtCountyCatalogEntry] = []
     @Published private(set) var isLoadingCounty = false
     @Published private(set) var source: Source = .direct
 
     private let apiClient: TexasWaterAPIClient?
     private let twdbClient = TWDroughtClient()
+    private var isLoadingCountyCatalog = false
 
     init() {
         apiClient = AppEnvironment.backendURL.map(TexasWaterAPIClient.init(baseURL:))
     }
 
     func load() async {
-        guard summary == nil, !isLoading else { return }
-        await refresh()
+        if summary == nil {
+            await refresh()
+        }
+        if counties.isEmpty {
+            await loadCountyCatalog()
+        }
     }
 
     func refresh() async {
@@ -58,12 +65,44 @@ final class DroughtDataStore: ObservableObject {
         defer { isLoadingCounty = false }
         do {
             if let apiClient {
-                countyRecords = try await apiClient.fetchDroughtCounty(name: name)
+                let detail = try await apiClient.fetchDroughtCounty(name: name)
+                if let boundary = detail.boundary {
+                    countyDetail = DroughtCountyDetail(county: detail.county, records: detail.records, boundary: boundary)
+                    countyRecords = detail.records
+                    source = .backend
+                } else if let directDetail = try? await twdbClient.fetchCountyDetail(named: name) {
+                    countyDetail = directDetail
+                    countyRecords = directDetail.records
+                    source = .direct
+                } else {
+                    countyDetail = detail
+                    countyRecords = detail.records
+                    source = .backend
+                }
             } else {
-                countyRecords = try await twdbClient.fetchCounty(named: name)
+                let detail = try await twdbClient.fetchCountyDetail(named: name)
+                countyDetail = detail
+                countyRecords = detail.records
             }
         } catch {
-            countyRecords = (try? await twdbClient.fetchCounty(named: name)) ?? []
+            countyDetail = try? await twdbClient.fetchCountyDetail(named: name)
+            if countyDetail != nil { source = .direct }
+            if let countyDetail {
+                countyRecords = countyDetail.records
+            } else {
+                countyRecords = []
+            }
+        }
+    }
+
+    private func loadCountyCatalog() async {
+        guard counties.isEmpty, !isLoadingCountyCatalog else { return }
+        isLoadingCountyCatalog = true
+        defer { isLoadingCountyCatalog = false }
+        if let apiClient, let catalog = try? await apiClient.fetchDroughtCountyCatalog() {
+            counties = catalog
+        } else {
+            counties = (try? await twdbClient.fetchCountyCatalog()) ?? []
         }
     }
 }
