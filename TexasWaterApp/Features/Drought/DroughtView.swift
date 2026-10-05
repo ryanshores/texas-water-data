@@ -171,16 +171,8 @@ struct DroughtView: View {
     }
 
     private func droughtMap(_ summary: DroughtSummary) -> some View {
-        VStack(alignment: .leading, spacing: 6) {
-            DroughtMapView(areas: summary.mapAreas)
-                .frame(height: 300)
-                .clipShape(RoundedRectangle(cornerRadius: 16))
-                .accessibilityLabel("Texas drought map showing all D0 through D4 drought areas")
-            Text("Shaded areas show the full drought footprint. Labels identify each category.")
-                .font(.caption)
-                .foregroundStyle(.secondary)
-        }
-        .padding(.horizontal)
+        DroughtMapView(areas: summary.mapAreas)
+            .padding(.horizontal)
     }
 
     private func color(for category: String) -> Color { switch category { case "D4": .purple; case "D3": .red; case "D2": .orange; case "D1": .yellow; case "D0": .mint; default: .blue } }

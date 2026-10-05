@@ -163,6 +163,9 @@ Apple Developer Program account is in scope.
 ### Phase 2 — drought
 
 - County status, statewide D0-D4 summary, week-over-week change, and map.
+- The main map combines drought footprints with reservoir markers. The Drought
+  and Reservoirs screens each provide an expandable full-screen map scoped to
+  their own data.
 - Integrate the statewide drought summary into Today without loading the county
   catalog there. ContentView owns one shared DroughtDataStore; Today loads only
   the lightweight overview, while the Drought tab loads the county catalog and

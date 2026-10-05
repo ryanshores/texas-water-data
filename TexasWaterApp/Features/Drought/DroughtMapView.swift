@@ -2,8 +2,10 @@ import MapKit
 import SwiftUI
 import TexasWaterCore
 
-struct DroughtMapView: UIViewRepresentable {
-    let areas: [DroughtMapArea]
+struct TexasWaterMapView: UIViewRepresentable {
+    let droughtAreas: [DroughtMapArea]
+    let reservoirs: [ReservoirSummary]
+    var onSelectReservoir: (ReservoirSummary) -> Void = { _ in }
 
     func makeCoordinator() -> Coordinator {
         Coordinator()
@@ -17,18 +19,31 @@ struct DroughtMapView: UIViewRepresentable {
         map.showsCompass = true
         map.showsScale = true
         map.pointOfInterestFilter = .excludingAll
+        map.setRegion(
+            MKCoordinateRegion(
+                center: CLLocationCoordinate2D(latitude: 31.2, longitude: -99.3),
+                span: MKCoordinateSpan(latitudeDelta: 7.8, longitudeDelta: 8.8)
+            ),
+            animated: false
+        )
         return map
     }
 
     func updateUIView(_ map: MKMapView, context: Context) {
+        context.coordinator.onSelectReservoir = onSelectReservoir
         map.removeOverlays(map.overlays)
         map.removeAnnotations(map.annotations)
 
-        let polygons = areas.flatMap { makePolygons(for: $0) }
+        let polygons = droughtAreas.flatMap { makePolygons(for: $0) }
         map.addOverlays(polygons)
-        map.addAnnotations(areas.compactMap(makeAnnotation))
+        map.addAnnotations(droughtAreas.compactMap(makeCategoryAnnotation))
+        map.addAnnotations(reservoirs.map(ReservoirAnnotation.init))
 
-        let rect = polygons.map(\.boundingMapRect).reduce(MKMapRect.null) { $0.union($1) }
+        var rect = polygons.map(\.boundingMapRect).reduce(MKMapRect.null) { $0.union($1) }
+        for reservoir in reservoirs {
+            let point = MKMapPoint(CLLocationCoordinate2D(latitude: reservoir.latitude, longitude: reservoir.longitude))
+            rect = rect.union(MKMapRect(origin: point, size: MKMapSize(width: 0, height: 0)))
+        }
         if !rect.isNull {
             map.setVisibleMapRect(
                 rect,
@@ -68,7 +83,7 @@ struct DroughtMapView: UIViewRepresentable {
         return coordinates.count > 2 ? coordinates : nil
     }
 
-    private func makeAnnotation(for area: DroughtMapArea) -> MKPointAnnotation? {
+    private func makeCategoryAnnotation(for area: DroughtMapArea) -> MKPointAnnotation? {
         let points = area.coordinates
             .flatMap { $0 }
             .flatMap { $0 }
@@ -88,6 +103,8 @@ struct DroughtMapView: UIViewRepresentable {
     }
 
     final class Coordinator: NSObject, MKMapViewDelegate {
+        var onSelectReservoir: (ReservoirSummary) -> Void = { _ in }
+
         func mapView(_ mapView: MKMapView, rendererFor overlay: MKOverlay) -> MKOverlayRenderer {
             guard let polygon = overlay as? MKPolygon else {
                 return MKOverlayRenderer(overlay: overlay)
@@ -102,16 +119,55 @@ struct DroughtMapView: UIViewRepresentable {
         }
 
         func mapView(_ mapView: MKMapView, viewFor annotation: MKAnnotation) -> MKAnnotationView? {
+            if let reservoirAnnotation = annotation as? ReservoirAnnotation {
+                let identifier = "reservoir"
+                let view = (mapView.dequeueReusableAnnotationView(withIdentifier: identifier) as? MKMarkerAnnotationView)
+                    ?? MKMarkerAnnotationView(annotation: annotation, reuseIdentifier: identifier)
+                view.annotation = annotation
+                view.glyphImage = UIImage(systemName: Self.symbol(for: reservoirAnnotation.reservoir.status))
+                view.markerTintColor = Self.color(for: reservoirAnnotation.reservoir.status)
+                view.displayPriority = .defaultHigh
+                view.titleVisibility = .hidden
+                view.subtitleVisibility = .hidden
+                view.accessibilityLabel = "\(reservoirAnnotation.reservoir.shortName), \(WaterFormatting.percent(reservoirAnnotation.reservoir.percentFull))"
+                return view
+            }
+
             let identifier = "drought-category"
             let view = (mapView.dequeueReusableAnnotationView(withIdentifier: identifier) as? MKMarkerAnnotationView)
                 ?? MKMarkerAnnotationView(annotation: annotation, reuseIdentifier: identifier)
             view.annotation = annotation
-            view.glyphText = (annotation.title ?? nil) ?? "?"
-            view.markerTintColor = Self.color(for: (annotation.title ?? nil))
+            view.glyphText = annotation.title ?? "?"
+            view.markerTintColor = Self.color(for: annotation.title)
             view.displayPriority = .required
             view.titleVisibility = .hidden
             view.subtitleVisibility = .hidden
             return view
+        }
+
+        func mapView(_ mapView: MKMapView, didSelect view: MKAnnotationView) {
+            guard let annotation = view.annotation as? ReservoirAnnotation else { return }
+            onSelectReservoir(annotation.reservoir)
+        }
+
+        private static func color(for status: ReservoirStatus) -> UIColor {
+            switch status {
+            case .nearFull: return .systemBlue
+            case .normal: return .systemTeal
+            case .low: return .systemOrange
+            case .critical: return .systemRed
+            case .unavailable: return .systemGray
+            }
+        }
+
+        private static func symbol(for status: ReservoirStatus) -> String {
+            switch status {
+            case .nearFull: return "drop.fill"
+            case .normal: return "drop.halffull"
+            case .low: return "drop"
+            case .critical: return "exclamationmark.triangle.fill"
+            case .unavailable: return "questionmark.circle"
+            }
         }
 
         private static func color(for category: String?) -> UIColor {
@@ -122,6 +178,55 @@ struct DroughtMapView: UIViewRepresentable {
             case "D1": return .systemYellow
             case "D0": return .systemTeal
             default: return .systemBlue
+            }
+        }
+    }
+}
+
+private final class ReservoirAnnotation: NSObject, MKAnnotation {
+    let reservoir: ReservoirSummary
+    let coordinate: CLLocationCoordinate2D
+
+    var title: String? { reservoir.shortName }
+
+    init(_ reservoir: ReservoirSummary) {
+        self.reservoir = reservoir
+        coordinate = CLLocationCoordinate2D(latitude: reservoir.latitude, longitude: reservoir.longitude)
+    }
+}
+
+struct DroughtMapView: View {
+    let areas: [DroughtMapArea]
+    @State private var isExpanded = false
+
+    var body: some View {
+        VStack(alignment: .leading, spacing: 6) {
+            TexasWaterMapView(droughtAreas: areas, reservoirs: [])
+                .frame(height: 300)
+                .clipShape(RoundedRectangle(cornerRadius: 16))
+                .accessibilityLabel("Texas drought map showing all D0 through D4 drought areas")
+            HStack {
+                Text("Shaded areas show the full drought footprint. Labels identify each category.")
+                    .font(.caption)
+                    .foregroundStyle(.secondary)
+                Spacer()
+                Button("Expand map", systemImage: "arrow.up.left.and.arrow.down.right") {
+                    isExpanded = true
+                }
+                .font(.caption.weight(.semibold))
+                .buttonStyle(.bordered)
+            }
+        }
+        .fullScreenCover(isPresented: $isExpanded) {
+            NavigationStack {
+                TexasWaterMapView(droughtAreas: areas, reservoirs: [])
+                    .ignoresSafeArea(edges: .bottom)
+                    .navigationTitle("Drought map")
+                    .toolbar {
+                        ToolbarItem(placement: .topBarTrailing) {
+                            Button("Done") { isExpanded = false }
+                        }
+                    }
             }
         }
     }

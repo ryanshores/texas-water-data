@@ -10,6 +10,7 @@
 		04A0110BFE43943B0B8D744B /* DroughtDataStore.swift in Sources */ = {isa = PBXBuildFile; fileRef = FDA1A8F5F5431272E84F5265 /* DroughtDataStore.swift */; };
 		0551E5E7043A82AFD06E9CDC /* AppEnvironment.swift in Sources */ = {isa = PBXBuildFile; fileRef = CB5F60F64EB5650E09C86242 /* AppEnvironment.swift */; };
 		0716C98545F68D9D618B7458 /* DroughtTodayCard.swift in Sources */ = {isa = PBXBuildFile; fileRef = B9D152E4F6A5DE5DD01380A0 /* DroughtTodayCard.swift */; };
+		1454186298F93C51AB6341D9 /* ReservoirMapPanel.swift in Sources */ = {isa = PBXBuildFile; fileRef = 002C534A2C8CCDA0B0A1CA6F /* ReservoirMapPanel.swift */; };
 		186264A05861D7D0375BBDEC /* NotificationSettingsView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 233F29D4B3FCC43941DCC0DC /* NotificationSettingsView.swift */; };
 		1B348E4B9573FFF797C70089 /* ContentView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 9A2330395D4CF259EDA912E2 /* ContentView.swift */; };
 		307A2307E82437087999A278 /* ReservoirListView.swift in Sources */ = {isa = PBXBuildFile; fileRef = AD961C2804A8BE786FAACEB7 /* ReservoirListView.swift */; };
@@ -66,6 +67,7 @@
 /* End PBXCopyFilesBuildPhase section */
 
 /* Begin PBXFileReference section */
+		002C534A2C8CCDA0B0A1CA6F /* ReservoirMapPanel.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ReservoirMapPanel.swift; sourceTree = "<group>"; };
 		09EE94ED7175994401FA3B6E /* ReservoirDetailView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ReservoirDetailView.swift; sourceTree = "<group>"; };
 		18CE220D7BF02E722A962CF8 /* DroughtMapView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DroughtMapView.swift; sourceTree = "<group>"; };
 		233F29D4B3FCC43941DCC0DC /* NotificationSettingsView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = NotificationSettingsView.swift; sourceTree = "<group>"; };
@@ -145,6 +147,7 @@
 			children = (
 				09EE94ED7175994401FA3B6E /* ReservoirDetailView.swift */,
 				AD961C2804A8BE786FAACEB7 /* ReservoirListView.swift */,
+				002C534A2C8CCDA0B0A1CA6F /* ReservoirMapPanel.swift */,
 			);
 			path = Reservoirs;
 			sourceTree = "<group>";
@@ -418,6 +421,7 @@
 				7198891B5BC1AF97295C5891 /* ReservoirDataStore.swift in Sources */,
 				85190710F3C50EAC2D273C8C /* ReservoirDetailView.swift in Sources */,
 				307A2307E82437087999A278 /* ReservoirListView.swift in Sources */,
+				1454186298F93C51AB6341D9 /* ReservoirMapPanel.swift in Sources */,
 				53F8405B87E811D3BD74D741 /* ReservoirMapView.swift in Sources */,
 				A5D59CA80B8CBD4E71FD1A2F /* ReservoirRow.swift in Sources */,
 				C0D050DA293D46BEA1E279EB /* SummaryHeroCard.swift in Sources */,

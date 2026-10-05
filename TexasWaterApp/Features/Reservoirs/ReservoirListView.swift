@@ -30,22 +30,30 @@ struct ReservoirListView: View {
     }
 
     private var list: some View {
-        List(filteredReservoirs) { reservoir in
-            NavigationLink {
-                ReservoirDetailView(reservoir: reservoir)
-            } label: {
-                ReservoirRow(reservoir: reservoir)
+        List {
+            if !store.reservoirs.isEmpty {
+                ReservoirMapPanel(reservoirs: store.reservoirs)
+                    .listRowInsets(EdgeInsets())
+                    .listRowSeparator(.hidden)
             }
-            .swipeActions(edge: .leading) {
-                Button {
-                    store.toggleFavorite(reservoir)
+
+            ForEach(filteredReservoirs) { reservoir in
+                NavigationLink {
+                    ReservoirDetailView(reservoir: reservoir)
                 } label: {
-                    Label(
-                        store.isFavorite(reservoir) ? "Unfavorite" : "Favorite",
-                        systemImage: store.isFavorite(reservoir) ? "star.slash" : "star"
-                    )
+                    ReservoirRow(reservoir: reservoir)
                 }
-                .tint(.yellow)
+                .swipeActions(edge: .leading) {
+                    Button {
+                        store.toggleFavorite(reservoir)
+                    } label: {
+                        Label(
+                            store.isFavorite(reservoir) ? "Unfavorite" : "Favorite",
+                            systemImage: store.isFavorite(reservoir) ? "star.slash" : "star"
+                        )
+                    }
+                    .tint(.yellow)
+                }
             }
         }
         .overlay {
