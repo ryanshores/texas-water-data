@@ -121,9 +121,9 @@ struct TexasWaterMapView: UIViewRepresentable {
                 view.glyphImage = Self.glyphImage(
                     for: reservoirAnnotation.reservoir.percentFull,
                     color: Self.color(for: status)
-                )
+                )?.withRenderingMode(.alwaysOriginal)
                 view.glyphText = nil
-                view.markerTintColor = Self.color(for: status)
+                view.markerTintColor = .clear
                 view.clusteringIdentifier = "reservoirs"
                 view.displayPriority = .defaultHigh
                 view.titleVisibility = .hidden
