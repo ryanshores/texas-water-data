@@ -141,18 +141,32 @@ struct DroughtView: View {
                             x: .value("Week", date),
                             y: .value("D0+ coverage", item.categories["D0"] ?? 0)
                         )
-                        .foregroundStyle(.orange)
+                        .interpolationMethod(.catmullRom)
+                        .foregroundStyle(by: .value("Drought threshold", "D0+"))
                         LineMark(
                             x: .value("Week", date),
                             y: .value("D2+ coverage", item.categories["D2"] ?? 0)
                         )
-                        .foregroundStyle(.red)
+                        .interpolationMethod(.catmullRom)
+                        .foregroundStyle(by: .value("Drought threshold", "D2+"))
                     }
                 }
                 .chartYScale(domain: 0...100)
-                .chartLegend(position: .bottom)
+                .chartForegroundStyleScale(["D0+": .orange, "D2+": .red])
+                .chartYAxis {
+                    AxisMarks(position: .leading, values: [0, 25, 50, 75, 100]) { value in
+                        AxisGridLine()
+                        AxisTick()
+                        AxisValueLabel {
+                            if let percent = value.as(Double.self) {
+                                Text("\(percent.formatted(.number.precision(.fractionLength(0))))%")
+                            }
+                        }
+                    }
+                }
+                .chartYAxisLabel("County area in drought", position: .leading)
+                .chartLegend(position: .bottom, alignment: .leading)
                 .frame(height: 160)
-                Text("Orange: D0+ · Red: D2+").font(.caption2).foregroundStyle(.secondary)
             }
         }
     }
