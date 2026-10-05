@@ -55,4 +55,28 @@ describe("county topology normalization", () => {
       coordinates: [[[-100, 30], [-99, 30], [-99, 31], [-100, 31], [-100, 30]]],
     });
   });
+
+  it("flattens multipart county boundaries into map rings", () => {
+    const boundary = countyBoundary({
+      transform: { scale: [0.1, 0.1], translate: [-100, 30] },
+      arcs: [
+        [[0, 0], [10, 0]],
+        [[10, 0], [0, 10]],
+        [[10, 10], [-10, 0]],
+        [[0, 10], [0, -10]],
+      ],
+      objects: {
+        counties: {
+          geometries: [{
+            id: "48453",
+            type: "MultiPolygon",
+            properties: { name: "Travis County" },
+            arcs: [[[0, 1, 2, 3]]],
+          }],
+        },
+      },
+    }, "Travis County");
+
+    expect(boundary?.coordinates).toEqual([[[-100, 30], [-99, 30], [-99, 31], [-100, 31], [-100, 30]]]);
+  });
 });

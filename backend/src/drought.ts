@@ -138,13 +138,22 @@ export function countyBoundary(topology: Topology, county: string): DroughtCount
   const geometries = topology.objects?.counties?.geometries ?? [];
   const geometry = geometries.find((candidate) => stringValue(candidate.properties?.name)?.toLowerCase() === county.toLowerCase());
   const fips = geometry && stringValue(geometry.id);
-  if (!geometry || !fips || geometry.type !== "Polygon" || !Array.isArray(geometry.arcs)) return null;
+  if (!geometry || !fips) return null;
 
   const transform = topology.transform;
   const arcs = topology.arcs;
   if (!transform || !Array.isArray(arcs)) return null;
-  const coordinates = geometry.arcs.flatMap((ring) => Array.isArray(ring) ? [joinArcs(ring, arcs, transform)] : []);
+  const rings = topologyRings(geometry.type, geometry.arcs);
+  if (!rings) return null;
+  const coordinates = rings.map((ring) => joinArcs(ring, arcs, transform)).filter((ring) => ring.length > 0);
   return coordinates.length > 0 ? { fips, county, coordinates } : null;
+}
+
+function topologyRings(type: unknown, arcs: unknown): unknown[][] | null {
+  if (!Array.isArray(arcs)) return null;
+  const polygons = type === "Polygon" ? [arcs] : type === "MultiPolygon" ? arcs : [];
+  const rings = polygons.flatMap((polygon) => Array.isArray(polygon) ? polygon.filter(Array.isArray) : []);
+  return rings.length > 0 ? rings as unknown[][] : null;
 }
 
 function joinArcs(indices: unknown[], arcs: unknown[], transform: TopologyTransform): number[][] {

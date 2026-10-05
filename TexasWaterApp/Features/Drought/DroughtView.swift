@@ -19,9 +19,9 @@ struct DroughtView: View {
                 }
             }
             .navigationTitle("Drought")
-            .toolbar { ToolbarItem(placement: .topBarTrailing) { Button { Task { await store.refresh() } } label: { Image(systemName: "arrow.clockwise") }.disabled(store.isLoading) } }
+            .toolbar { ToolbarItem(placement: .topBarTrailing) { Button { Task { await store.refresh(); await store.load() } } label: { Image(systemName: "arrow.clockwise") }.disabled(store.isLoading) } }
             .task { await store.load() }
-            .refreshable { await store.refresh() }
+            .refreshable { await store.refresh(); await store.load() }
         }
     }
 
