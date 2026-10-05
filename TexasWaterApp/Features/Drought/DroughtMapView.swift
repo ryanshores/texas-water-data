@@ -137,8 +137,8 @@ struct TexasWaterMapView: UIViewRepresentable {
             let view = (mapView.dequeueReusableAnnotationView(withIdentifier: identifier) as? MKMarkerAnnotationView)
                 ?? MKMarkerAnnotationView(annotation: annotation, reuseIdentifier: identifier)
             view.annotation = annotation
-            view.glyphText = annotation.title ?? "?"
-            view.markerTintColor = Self.color(for: annotation.title)
+            view.glyphText = (annotation.title ?? nil) ?? "?"
+            view.markerTintColor = Self.color(for: (annotation.title ?? nil))
             view.displayPriority = .required
             view.titleVisibility = .hidden
             view.subtitleVisibility = .hidden
