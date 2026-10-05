@@ -197,7 +197,7 @@ public struct TWDroughtClient: Sendable {
         observedAt: String,
         sourceName: String
     ) -> StreamflowSummary {
-        let values = (payload.data?.value ?? []).filter { $0.isFinite }
+        let values = (payload.data?.value ?? []).compactMap(\.value).filter { $0.isFinite }
         let sorted = values.sorted()
         let median: Double?
         if sorted.isEmpty {
@@ -241,7 +241,24 @@ private struct StreamflowPayload: Decodable {
 }
 
 private struct StreamflowValues: Decodable {
-    let value: [Double]?
+    let value: [LossyDouble]?
+}
+
+private struct LossyDouble: Decodable {
+    let value: Double?
+
+    init(from decoder: Decoder) throws {
+        let container = try decoder.singleValueContainer()
+        if container.decodeNil() {
+            value = nil
+        } else if let number = try? container.decode(Double.self) {
+            value = number
+        } else if let text = try? container.decode(String.self) {
+            value = Double(text.trimmingCharacters(in: .whitespacesAndNewlines))
+        } else {
+            value = nil
+        }
+    }
 }
 
 private struct StateRecord: Decodable {
