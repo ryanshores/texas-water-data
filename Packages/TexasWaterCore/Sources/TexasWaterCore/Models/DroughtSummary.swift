@@ -17,6 +17,9 @@ public struct DroughtSummary: Codable, Equatable, Sendable {
 
     public var droughtCoverage: Double { categories["D0"] ?? 0 }
     public var severeOrWorseCoverage: Double { categories["D2"] ?? 0 }
+    public var highestCategory: String {
+        ["D4", "D3", "D2", "D1", "D0"].first { (categories[$0] ?? 0) > 0 } ?? "None"
+    }
 }
 
 public struct DroughtMapArea: Codable, Equatable, Sendable, Identifiable {

@@ -37,10 +37,14 @@ after the core experience is reliable.
 
 - Search by lake name.
 - Filter by basin, planning region, municipal area, and distance.
+- Basin filtering lives on the Reservoirs screen; a separate basin tab is not
+  needed because its map and list are driven by the same filter.
 - Sort by fastest rising/falling, fullest/lowest, storage change, or distance.
 - Toggle statewide rankings between all reservoirs and major-capacity reservoirs
   so a rapid change at a small lake does not obscure a large water-supply
   reservoir.
+- Cluster reservoir markers at wide zoom levels with a count badge and
+  capacity-weighted fullness color; tapping a cluster zooms into its members.
 - MapKit marker clustering with accessible status labels.
 
 ### Basin detail
@@ -163,6 +167,9 @@ Apple Developer Program account is in scope.
 ### Phase 2 — drought
 
 - County status, statewide D0-D4 summary, week-over-week change, and map.
+- The main map combines drought footprints with reservoir markers. The Drought
+  and Reservoirs screens each provide an expandable full-screen map scoped to
+  their own data.
 - Integrate the statewide drought summary into Today without loading the county
   catalog there. ContentView owns one shared DroughtDataStore; Today loads only
   the lightweight overview, while the Drought tab loads the county catalog and
@@ -180,8 +187,10 @@ Drought tab, and a refreshable source/error state. County history is available
 through `/v1/drought/counties/{county}`. The county-detail slice adds the
 official county catalog, searchable selection, six-month D0+/D2+ coverage
 history, and exact TWDB county boundary rendering. Soil moisture, streamflow,
-and additional drought-index layers remain follow-on work. The next planned
-slice is the Today drought summary integration described above.
+and additional drought-index layers remain follow-on work. The Today
+summary card and shared overview loading are now implemented on the
+`feature/today-drought-summary` branch; county catalog and history loading
+remain scoped to the Drought tab.
 
 ### Phase 3 — groundwater and weather context
 

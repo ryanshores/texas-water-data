@@ -4,45 +4,20 @@ import TexasWaterCore
 
 struct ReservoirMapView: View {
     @EnvironmentObject private var store: ReservoirDataStore
+    @EnvironmentObject private var droughtStore: DroughtDataStore
     @State private var selectedReservoir: ReservoirSummary?
-    @State private var position: MapCameraPosition = .region(
-        MKCoordinateRegion(
-            center: CLLocationCoordinate2D(latitude: 31.2, longitude: -99.3),
-            span: MKCoordinateSpan(latitudeDelta: 7.8, longitudeDelta: 8.8)
-        )
-    )
 
     var body: some View {
         NavigationStack {
-            Map(position: $position) {
-                ForEach(store.reservoirs) { reservoir in
-                    Annotation(
-                        reservoir.shortName,
-                        coordinate: CLLocationCoordinate2D(
-                            latitude: reservoir.latitude,
-                            longitude: reservoir.longitude
-                        ),
-                        anchor: .bottom
-                    ) {
-                        Button { selectedReservoir = reservoir } label: {
-                            Image(systemName: reservoir.status.systemImage)
-                                .font(.caption.bold())
-                                .foregroundStyle(.white)
-                                .padding(7)
-                                .background(Color.reservoirStatus(reservoir.status), in: Circle())
-                                .shadow(radius: 2, y: 1)
-                        }
-                        .buttonStyle(.plain)
-                        .accessibilityLabel("\(reservoir.shortName), \(WaterFormatting.percent(reservoir.percentFull))")
-                    }
-                }
-            }
-            .mapStyle(.standard(elevation: .flat))
-            .mapControls {
-                MapCompass()
-                MapScaleView()
-            }
+            TexasWaterMapView(
+                droughtAreas: droughtStore.summary?.mapAreas ?? [],
+                reservoirs: store.reservoirs,
+                onSelectReservoir: { selectedReservoir = $0 }
+            )
+            .ignoresSafeArea(edges: .bottom)
+            .accessibilityLabel("Texas map showing drought areas and reservoirs")
             .navigationTitle("Map")
+            .task { await droughtStore.loadOverview() }
             .sheet(item: $selectedReservoir) { reservoir in
                 NavigationStack {
                     ReservoirDetailView(reservoir: reservoir)

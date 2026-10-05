@@ -4,7 +4,7 @@ import SwiftUI
 import TexasWaterCore
 
 struct DroughtView: View {
-    @StateObject private var store = DroughtDataStore()
+    @EnvironmentObject private var store: DroughtDataStore
     @State private var selectedCountyID = ""
 
     var body: some View {
@@ -171,23 +171,8 @@ struct DroughtView: View {
     }
 
     private func droughtMap(_ summary: DroughtSummary) -> some View {
-        Map(initialPosition: .region(MKCoordinateRegion(center: CLLocationCoordinate2D(latitude: 31.0, longitude: -99.9), span: MKCoordinateSpan(latitudeDelta: 9, longitudeDelta: 10)))) {
-            ForEach(summary.mapAreas) { area in
-                if let coordinate = centroid(area.coordinates) {
-                    Annotation(area.category, coordinate: coordinate) { Circle().fill(color(for: area.category)).frame(width: 22, height: 22).overlay(Text(area.category).font(.caption2.bold()).foregroundStyle(.white)) }
-                }
-            }
-        }
-        .frame(height: 260)
-        .clipShape(RoundedRectangle(cornerRadius: 16))
-        .padding(.horizontal)
-        .accessibilityLabel("Texas drought category map")
-    }
-
-    private func centroid(_ polygons: [[[[Double]]]]) -> CLLocationCoordinate2D? {
-        let points = polygons.flatMap { $0 }.flatMap { $0 }.compactMap { pair -> CLLocationCoordinate2D? in guard pair.count > 1 else { return nil }; return CLLocationCoordinate2D(latitude: pair[1], longitude: pair[0]) }
-        guard !points.isEmpty else { return nil }
-        return CLLocationCoordinate2D(latitude: points.map(\.latitude).reduce(0, +) / Double(points.count), longitude: points.map(\.longitude).reduce(0, +) / Double(points.count))
+        DroughtMapView(areas: summary.mapAreas)
+            .padding(.horizontal)
     }
 
     private func color(for category: String) -> Color { switch category { case "D4": .purple; case "D3": .red; case "D2": .orange; case "D1": .yellow; case "D0": .mint; default: .blue } }

@@ -94,6 +94,18 @@ final class TexasWaterCoreTests: XCTestCase {
         XCTAssertEqual(ReservoirStatus.classify(percentFull: nil), .unavailable)
     }
 
+    func testDroughtSummaryFindsHighestActiveCategory() {
+        let summary = DroughtSummary(
+            mapDate: "2026-10-01",
+            previousMapDate: "2026-09-24",
+            categories: ["D0": 99, "D1": 80, "D2": 45, "D3": 10, "D4": 0],
+            weekOverWeek: [:],
+            mapAreas: []
+        )
+
+        XCTAssertEqual(summary.highestCategory, "D3")
+    }
+
     func testCapacityContextAndBasinSummariesUsePairedValues() {
         let small = summary(id: "small", basin: "Colorado", storage: 10, capacity: 100)
         let medium = summary(id: "medium", basin: "Colorado", storage: 200, capacity: 400)
