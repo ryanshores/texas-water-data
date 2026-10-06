@@ -7,11 +7,13 @@ struct ContentView: View {
         case reservoirs
         case map
         case drought
+        case groundwater
         case about
     }
 
     @StateObject private var store = ReservoirDataStore()
     @StateObject private var droughtStore = DroughtDataStore()
+    @StateObject private var groundwaterStore = GroundwaterDataStore()
     @StateObject private var alerts = LocalAlertManager()
     @ObservedObject private var deepLinkInbox = TexasWaterDeepLinkInbox.shared
     @State private var selectedTab: Tab = .today
@@ -36,6 +38,10 @@ struct ContentView: View {
                 .tabItem { Label("Drought", systemImage: "sun.max") }
                 .tag(Tab.drought)
 
+            GroundwaterView()
+                .tabItem { Label("Groundwater", systemImage: "drop.degreesign") }
+                .tag(Tab.groundwater)
+
             AboutView()
                 .tabItem { Label("About", systemImage: "info.circle") }
                 .tag(Tab.about)
@@ -43,6 +49,7 @@ struct ContentView: View {
         .tint(Color.waterBlue)
         .environmentObject(store)
         .environmentObject(droughtStore)
+        .environmentObject(groundwaterStore)
         .environmentObject(alerts)
         .task {
             await store.load()

@@ -44,6 +44,16 @@ public struct TexasWaterAPIClient: Sendable {
         return payload.counties
     }
 
+    public func fetchGroundwaterWells() async throws -> [GroundwaterWell] {
+        let payload: GroundwaterCatalogPayload = try await decode(path: "v1/groundwater/wells")
+        return payload.wells
+    }
+
+    public func fetchGroundwaterHistory(wellID: String) async throws -> [GroundwaterReading] {
+        let payload: GroundwaterHistoryPayload = try await decode(path: "v1/groundwater/wells/\(wellID)")
+        return payload.readings
+    }
+
     public func fetchHistory(reservoirID: String, range: String = "1y") async throws -> [ReservoirObservation] {
         let encodedID = reservoirID.addingPercentEncoding(withAllowedCharacters: .urlPathAllowed) ?? reservoirID
         let payload: [HistoryPayload] = try await decode(path: "v1/reservoirs/\(encodedID)/history?range=\(range)")
@@ -91,4 +101,7 @@ public struct TexasWaterAPIClient: Sendable {
     private struct CountyCatalogPayload: Decodable, Sendable {
         let counties: [DroughtCountyCatalogEntry]
     }
+
+    private struct GroundwaterCatalogPayload: Decodable, Sendable { let wells: [GroundwaterWell] }
+    private struct GroundwaterHistoryPayload: Decodable, Sendable { let readings: [GroundwaterReading] }
 }
