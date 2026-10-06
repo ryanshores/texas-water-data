@@ -70,7 +70,7 @@ final class TexasWaterCoreTests: XCTestCase {
 
         XCTAssertEqual(dashboard.statewidePercentFull ?? 0, 89.2, accuracy: 0.01)
         XCTAssertEqual(travis.slug, "travis")
-        XCTAssertEqual(travis.status, .normal)
+        XCTAssertEqual(travis.status, .nearFull)
         XCTAssertEqual(travis.heightFromConservationPool ?? 0, -6.48, accuracy: 0.001)
     }
 
@@ -129,9 +129,17 @@ final class TexasWaterCoreTests: XCTestCase {
     }
 
     private func fixture(named name: String, extension fileExtension: String) throws -> Data {
+#if SWIFT_PACKAGE
         let url = try XCTUnwrap(
             Bundle.module.url(forResource: name, withExtension: fileExtension, subdirectory: "Fixtures")
         )
+#else
+        let bundle = Bundle(for: TexasWaterCoreTests.self)
+        let url = try XCTUnwrap(
+            bundle.url(forResource: name, withExtension: fileExtension, subdirectory: "Fixtures")
+                ?? bundle.url(forResource: name, withExtension: fileExtension)
+        )
+#endif
         return try Data(contentsOf: url)
     }
 

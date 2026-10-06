@@ -56,7 +56,33 @@ targets:
         INFOPLIST_KEY_CFBundleShortVersionString: "$(MARKETING_VERSION)"
         TEXAS_WATER_API_BASE_URL: "https://texas-water-api.ryan-shores.workers.dev"
     scheme:
-      testTargets: []
+      testTargets:
+        - TexasWaterAppTests
+        - TexasWaterCoreTests
+  TexasWaterAppTests:
+    type: bundle.unit-test
+    platform: iOS
+    sources:
+      - TexasWaterAppTests
+    settings:
+      base:
+        GENERATE_INFOPLIST_FILE: YES
+    dependencies:
+      - target: TexasWater
+  TexasWaterCoreTests:
+    type: bundle.unit-test
+    platform: iOS
+    sources:
+      - path: Packages/TexasWaterCore/Tests/TexasWaterCoreTests
+        excludes:
+          - Fixtures
+    resources:
+      - path: Packages/TexasWaterCore/Tests/TexasWaterCoreTests/Fixtures
+    settings:
+      base:
+        GENERATE_INFOPLIST_FILE: YES
+    dependencies:
+      - package: TexasWaterCore
   TexasWaterWidget:
     type: app-extension
     platform: iOS

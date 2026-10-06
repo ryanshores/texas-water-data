@@ -6,8 +6,8 @@ actor DashboardCache {
     private let encoder = JSONEncoder()
     private let decoder = JSONDecoder()
 
-    init(fileManager: FileManager = .default) {
-        directory = SharedWaterData.cacheDirectory(fileManager: fileManager)
+    init(directory: URL? = nil, fileManager: FileManager = .default) {
+        self.directory = directory ?? SharedWaterData.cacheDirectory(fileManager: fileManager)
     }
 
     func loadDashboard() throws -> ReservoirDashboard {
