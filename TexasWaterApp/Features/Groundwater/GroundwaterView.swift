@@ -35,7 +35,7 @@ struct GroundwaterView: View {
             ForEach(filtered) { well in
                 Button { selectedWell = well } label: {
                     HStack { VStack(alignment: .leading) { Text(well.id).font(.headline); Text("\(well.aquifer) · \(well.county) County").font(.caption).foregroundStyle(.secondary) }
-                        Spacer(); VStack(alignment: .trailing) { Text(well.depthBelowLandSurface.map { String(format: "%.1f ft", $0) } ?? "—"); Text("below land").font(.caption2).foregroundStyle(.secondary) }
+                        Spacer(); VStack(alignment: .trailing) { Text(well.depthBelowLandSurface.map { String(format: "%.1f ft", $0) } ?? "—"); Text("below land").font(.caption2).foregroundStyle(.secondary); Text(well.observedAt ?? "No observation date").font(.caption2).foregroundStyle(.secondary) }
                     }
                 }.tint(.primary).swipeActions { Button { store.toggleFavorite(well) } label: { Label(store.favoriteIDs.contains(well.id) ? "Unfavorite" : "Favorite", systemImage: "star") }.tint(.yellow) }
             }
@@ -60,7 +60,8 @@ private struct GroundwaterDetailView: View {
                 }
                 if !readings.isEmpty {
                     Section("History") {
-                        Chart(readings) { LineMark(x: .value("Date", $0.date), y: .value("Depth", $0.depthBelowLandSurface)) }
+                        Chart(readings) { LineMark(x: .value("Date", $0.date), y: .value("Depth below land surface", $0.depthBelowLandSurface)) }
+                            .chartYScale(domain: (readings.map(\.depthBelowLandSurface).max() ?? 1)...(readings.map(\.depthBelowLandSurface).min() ?? 0))
                             .frame(height: 180)
                     }
                 }

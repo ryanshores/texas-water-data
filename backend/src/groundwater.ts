@@ -45,11 +45,21 @@ export async function fetchGroundwaterWells(fetcher: typeof fetch = fetch): Prom
 export async function fetchGroundwaterHistory(id: string, fetcher: typeof fetch = fetch): Promise<GroundwaterReading[]> {
   if (!/^\d{7}$/.test(id)) throw new Error("Invalid state well number");
   const payload = await fetchJSON<HistoryPayload>(`${WELL_URL}/${id}.json`, fetcher);
-  return payload.values.flatMap((value) => {
+  const daily = new Map<string, { total: number; count: number }>();
+  payload.values.flatMap((value) => {
     const date = stringValue(value.datetime)?.slice(0, 10);
     const depth = numberValue(value["water_level(ft below land surface)"]);
-    return date && depth !== null ? [{ date, depthBelowLandSurface: depth }] : [];
+    return date && depth !== null ? [{ date, depth }] : [];
+  }).forEach(({ date, depth }) => {
+    const current = daily.get(date) ?? { total: 0, count: 0 };
+    current.total += depth;
+    current.count += 1;
+    daily.set(date, current);
   });
+  return [...daily.entries()]
+    .sort(([left], [right]) => left.localeCompare(right))
+    .slice(-730)
+    .map(([date, value]) => ({ date, depthBelowLandSurface: value.total / value.count }));
 }
 
 async function fetchJSON<T>(url: string, fetcher: typeof fetch): Promise<T> {

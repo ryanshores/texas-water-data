@@ -9,7 +9,7 @@ describe("groundwater source normalization", () => {
     await expect(fetchGroundwaterWells(fetcher)).resolves.toEqual([{ id: "1234567", county: "Travis", aquifer: "Trinity", aquiferType: "Confined", status: "Active", latitude: 30.3, longitude: -97.7, observedAt: "2026-10-05", depthBelowLandSurface: 123.4 }]);
   });
   it("retains valid dated water-level observations", async () => {
-    const fetcher: typeof fetch = async () => Response.json({ values: [{ datetime: "2026-10-05 08:00:00", "water_level(ft below land surface)": 123.4 }, { datetime: "bad", "water_level(ft below land surface)": null }] });
-    await expect(fetchGroundwaterHistory("1234567", fetcher)).resolves.toEqual([{ date: "2026-10-05", depthBelowLandSurface: 123.4 }]);
+    const fetcher: typeof fetch = async () => Response.json({ values: [{ datetime: "2026-10-05 08:00:00", "water_level(ft below land surface)": 123.4 }, { datetime: "2026-10-05 09:00:00", "water_level(ft below land surface)": 124.6 }, { datetime: "bad", "water_level(ft below land surface)": null }] });
+    await expect(fetchGroundwaterHistory("1234567", fetcher)).resolves.toEqual([{ date: "2026-10-05", depthBelowLandSurface: 124 }]);
   });
 });
