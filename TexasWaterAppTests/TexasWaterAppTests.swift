@@ -8,7 +8,9 @@ final class TexasWaterAppTests: XCTestCase {
     func testMissingGroundwaterConfigurationShowsErrorsWithoutCrashing() async {
         let directory = FileManager.default.temporaryDirectory.appending(path: "GroundwaterTests-\(UUID())")
         defer { try? FileManager.default.removeItem(at: directory) }
-        let store = GroundwaterDataStore(cache: DashboardCache(directory: directory), baseURL: nil)
+        let store = GroundwaterDataStore(cache: DashboardCache(directory: directory), baseURL: nil,
+            fetchDirectWells: { throw TexasWaterAPIError.invalidResponse },
+            fetchDirectHistory: { _ in throw TexasWaterAPIError.invalidResponse })
         await store.load()
         await store.loadHistory(wellID: "missing")
         XCTAssertNotNil(store.errorMessage)
@@ -85,7 +87,8 @@ final class TexasWaterAppTests: XCTestCase {
         }, fetchHistory: { _ in
             if failing { throw TexasWaterAPIError.invalidResponse }
             return refreshedHistory
-        })
+        }, fetchDirectWells: { throw TexasWaterAPIError.invalidResponse },
+           fetchDirectHistory: { _ in throw TexasWaterAPIError.invalidResponse })
         await store.load()
         await store.loadHistory(wellID: "well-1")
         XCTAssertEqual(store.wells, wells)
@@ -112,7 +115,9 @@ final class TexasWaterAppTests: XCTestCase {
         let store = GroundwaterDataStore(cache: DashboardCache(directory: directory), fetchWells: {
             if failing { throw TexasWaterAPIError.invalidResponse }
             return []
-        }, fetchHistory: { _ in throw TexasWaterAPIError.invalidResponse })
+        }, fetchHistory: { _ in throw TexasWaterAPIError.invalidResponse },
+           fetchDirectWells: { throw TexasWaterAPIError.invalidResponse },
+           fetchDirectHistory: { _ in throw TexasWaterAPIError.invalidResponse })
         await store.load()
         await store.loadHistory(wellID: "missing")
         XCTAssertNotNil(store.errorMessage)
@@ -120,6 +125,27 @@ final class TexasWaterAppTests: XCTestCase {
         failing = false
         await store.refresh()
         XCTAssertNil(store.errorMessage)
+    }
+
+    func testGroundwaterFallsBackToDirectTWDBForCatalogAndHistory() async throws {
+        let directory = FileManager.default.temporaryDirectory.appending(path: "GroundwaterTests-\(UUID())")
+        defer { try? FileManager.default.removeItem(at: directory) }
+        let wells = try JSONDecoder().decode([GroundwaterWell].self, from: Data("""
+        [{"id":"well-2","county":"Travis","aquifer":"Trinity","status":"active","latitude":30,"longitude":-98}]
+        """.utf8))
+        let readings = try self.readings("""
+        [{"date":"2026-10-05","depthBelowLandSurface":8}]
+        """)
+        let store = GroundwaterDataStore(cache: DashboardCache(directory: directory),
+            fetchWells: { throw TexasWaterAPIError.unsuccessfulStatus(503) },
+            fetchHistory: { _ in throw TexasWaterAPIError.unsuccessfulStatus(503) },
+            fetchDirectWells: { wells }, fetchDirectHistory: { _ in readings })
+        await store.load()
+        await store.loadHistory(wellID: "well-2")
+        XCTAssertEqual(store.wells, wells)
+        XCTAssertEqual(store.histories["well-2"], readings)
+        XCTAssertNil(store.errorMessage)
+        XCTAssertNil(store.historyErrors["well-2"])
     }
 
     func testReservoirHistoryRefreshesAfterDashboardRefreshAndOnDemand() async throws {

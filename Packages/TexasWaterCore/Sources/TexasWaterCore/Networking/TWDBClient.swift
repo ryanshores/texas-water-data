@@ -7,6 +7,12 @@ public enum TWDBEndpoint {
     public static let baseURL = URL(string: "https://waterdatafortexas.org")!
     public static let statewidePage = baseURL.appending(path: "reservoirs/statewide")
     public static let recentConditions = baseURL.appending(path: "reservoirs/recent-conditions.json")
+    public static let groundwaterWells = baseURL.appending(path: "groundwater/wells.geojson")
+    public static let groundwaterRecentConditions = baseURL.appending(path: "groundwater/recent-conditions.json")
+
+    public static func groundwaterWellHistory(id: String) -> URL {
+        baseURL.appending(path: "groundwater/well/\(id).json")
+    }
 
     public static func oneYearHistory(slug: String) -> URL {
         baseURL.appending(path: "reservoirs/individual/\(slug)-1year.csv")

@@ -136,6 +136,61 @@ final class TexasWaterCoreTests: XCTestCase {
         XCTAssertEqual(GroundwaterTrend.waterTableChange(readings: readings), 3.5)
     }
 
+    func testDirectGroundwaterClientBuildsCatalogFromTWDBSources() async throws {
+        let loader: @Sendable (URL) async throws -> Data = { url in
+            if url == TWDBEndpoint.groundwaterWells {
+                return Data("""
+                {"features":[
+                  {"geometry":{"coordinates":[-98.0,30.0]},"properties":{"well_number":"1234567","county":"Travis","aquifer":"Trinity","aquifer_type":"Major","status":"Active"}},
+                  {"geometry":{"coordinates":[-97.0,31.0]},"properties":{"well_number":"7654321","county":"Williamson","aquifer":"Edwards"}},
+                  {"geometry":{"coordinates":[-97.0]},"properties":{"well_number":"0000001","county":"Bad","aquifer":"Invalid"}}
+                ]}
+                """.utf8)
+            }
+            guard url == TWDBEndpoint.groundwaterRecentConditions else {
+                throw TWDBClientError.nonHTTPResponse
+            }
+            return Data("""
+            {"values":[{"state_well_number":"1234567","date":"2026-10-05","daily_high_water_level(ft below land surface)":42.5}]}
+            """.utf8)
+        }
+        let wells = try await TWDBGroundwaterClient(load: loader).fetchWells()
+        XCTAssertEqual(wells.map(\.id), ["1234567", "7654321"])
+        XCTAssertEqual(wells[0].latitude, 30)
+        XCTAssertEqual(wells[0].longitude, -98)
+        XCTAssertEqual(wells[0].status, "Active")
+        XCTAssertEqual(wells[0].observedAt, "2026-10-05")
+        XCTAssertEqual(wells[0].depthBelowLandSurface, 42.5)
+        XCTAssertEqual(wells[1].status, "Unknown")
+        XCTAssertNil(wells[1].depthBelowLandSurface)
+    }
+
+    func testDirectGroundwaterClientAveragesDailyHistoryAndRejectsBadIDs() async throws {
+        let loader: @Sendable (URL) async throws -> Data = { url in
+            guard url == TWDBEndpoint.groundwaterWellHistory(id: "1234567") else {
+                throw TWDBClientError.nonHTTPResponse
+            }
+            return Data("""
+            {"values":[
+              {"datetime":"2026-10-05T12:00:00Z","water_level(ft below land surface)":10},
+              {"datetime":"2026-10-05T13:00:00Z","water_level(ft below land surface)":12},
+              {"datetime":"2026-10-01T12:00:00Z","water_level(ft below land surface)":14},
+              {"datetime":"2026-10-02T12:00:00Z","water_level(ft below land surface)":null}
+            ]}
+            """.utf8)
+        }
+        let client = TWDBGroundwaterClient(load: loader)
+        let history = try await client.fetchHistory(wellID: "1234567")
+        XCTAssertEqual(history, [
+            GroundwaterReading(date: "2026-10-01", depthBelowLandSurface: 14),
+            GroundwaterReading(date: "2026-10-05", depthBelowLandSurface: 11),
+        ])
+        do {
+            _ = try await client.fetchHistory(wellID: "not-a-well")
+            XCTFail("Expected invalid well identifier to be rejected")
+        } catch is TexasWaterAPIError { }
+    }
+
     private func fixture(named name: String, extension fileExtension: String) throws -> Data {
 #if SWIFT_PACKAGE
         let url = try XCTUnwrap(

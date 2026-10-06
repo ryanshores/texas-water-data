@@ -13,6 +13,8 @@ final class GroundwaterDataStore: ObservableObject {
 
     private let fetchWells: () async throws -> [GroundwaterWell]
     private let fetchHistory: (String) async throws -> [GroundwaterReading]
+    private let fetchDirectWells: () async throws -> [GroundwaterWell]
+    private let fetchDirectHistory: (String) async throws -> [GroundwaterReading]
     private let cache: DashboardCache
     private let defaults: UserDefaults
     private let favoritesKey = "favoriteGroundwaterWellIDs"
@@ -20,18 +22,41 @@ final class GroundwaterDataStore: ObservableObject {
     init(defaults: UserDefaults? = nil, cache: DashboardCache = DashboardCache(),
          baseURL: URL? = AppEnvironment.backendURL,
          fetchWells: (() async throws -> [GroundwaterWell])? = nil,
-         fetchHistory: ((String) async throws -> [GroundwaterReading])? = nil) {
+         fetchHistory: ((String) async throws -> [GroundwaterReading])? = nil,
+         fetchDirectWells: (() async throws -> [GroundwaterWell])? = nil,
+         fetchDirectHistory: ((String) async throws -> [GroundwaterReading])? = nil) {
         self.defaults = defaults ?? SharedWaterData.defaults
         favoriteIDs = Set(self.defaults.stringArray(forKey: favoritesKey) ?? [])
         self.cache = cache
         let client = baseURL.map(TexasWaterAPIClient.init(baseURL:))
-        self.fetchWells = fetchWells ?? {
-            guard let client else { throw TexasWaterAPIError.invalidResponse }
-            return try await client.fetchGroundwaterWells()
+        let directClient = TWDBGroundwaterClient()
+        self.fetchDirectWells = fetchDirectWells ?? { try await directClient.fetchWells() }
+        self.fetchDirectHistory = fetchDirectHistory ?? { id in try await directClient.fetchHistory(wellID: id) }
+        let fallbackWells = self.fetchDirectWells
+        let fallbackHistory = self.fetchDirectHistory
+        let backendWells: (() async throws -> [GroundwaterWell])? = if let fetchWells {
+            fetchWells
+        } else if let client {
+            { try await client.fetchGroundwaterWells() }
+        } else {
+            nil
         }
-        self.fetchHistory = fetchHistory ?? { id in
-            guard let client else { throw TexasWaterAPIError.invalidResponse }
-            return try await client.fetchGroundwaterHistory(wellID: id)
+        let backendHistory: ((String) async throws -> [GroundwaterReading])? = if let fetchHistory {
+            fetchHistory
+        } else if let client {
+            { id in try await client.fetchGroundwaterHistory(wellID: id) }
+        } else {
+            nil
+        }
+        self.fetchWells = {
+            guard let backendWells else { return try await fallbackWells() }
+            do { return try await backendWells() }
+            catch { return try await fallbackWells() }
+        }
+        self.fetchHistory = { id in
+            guard let backendHistory else { return try await fallbackHistory(id) }
+            do { return try await backendHistory(id) }
+            catch { return try await fallbackHistory(id) }
         }
     }
 
