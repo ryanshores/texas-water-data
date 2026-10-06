@@ -1,6 +1,7 @@
 import { readDashboard, readHistory, upsertCurrentConditions } from "./database";
 import { fetchDroughtCountyCatalog, fetchDroughtCountyDetail, fetchDroughtSummary } from "./drought";
 import { fetchDroughtHydrologyContext } from "./hydrology";
+import { fetchGroundwaterHistory, fetchGroundwaterWells } from "./groundwater";
 import { extractOfficialSlugMap, normalizeSnapshot, slugify } from "./normalize";
 
 const TWDB_CURRENT_URL = "https://waterdatafortexas.org/reservoirs/recent-conditions.json";
@@ -34,6 +35,14 @@ export default {
         return json({ counties: await fetchDroughtCountyCatalog() }, 200, {
           "Cache-Control": "public, max-age=86400",
         });
+      }
+
+      if (url.pathname === "/v1/groundwater/wells") {
+        return json({ wells: await fetchGroundwaterWells() }, 200, { "Cache-Control": "public, max-age=900" });
+      }
+      const groundwaterWellMatch = url.pathname.match(/^\/v1\/groundwater\/wells\/(\d{7})$/);
+      if (groundwaterWellMatch) {
+        return json({ readings: await fetchGroundwaterHistory(groundwaterWellMatch[1]!) }, 200, { "Cache-Control": "public, max-age=3600" });
       }
 
       const droughtCountyMatch = url.pathname.match(/^\/v1\/drought\/counties\/([^/]+)$/);

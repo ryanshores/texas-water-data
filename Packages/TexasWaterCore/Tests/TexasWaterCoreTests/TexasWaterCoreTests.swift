@@ -128,6 +128,14 @@ final class TexasWaterCoreTests: XCTestCase {
         XCTAssertEqual(brazos.includedReservoirCount, 1)
     }
 
+    func testGroundwaterTrendUsesRisingWaterTableSemantics() {
+        let readings = [
+            GroundwaterReading(date: "2026-09-01", depthBelowLandSurface: 125),
+            GroundwaterReading(date: "2026-10-01", depthBelowLandSurface: 121.5),
+        ]
+        XCTAssertEqual(GroundwaterTrend.waterTableChange(readings: readings), 3.5)
+    }
+
     private func fixture(named name: String, extension fileExtension: String) throws -> Data {
 #if SWIFT_PACKAGE
         let url = try XCTUnwrap(
