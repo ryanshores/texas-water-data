@@ -32,8 +32,8 @@ jobs:
       - uses: actions/checkout@v4
       - name: Test TexasWaterCore
         run: swift test --package-path Packages/TexasWaterCore
-      - name: Build iOS app and widget
+      - name: Test iOS app and Core on simulator
         run: >-
           xcodebuild -project TexasWater.xcodeproj -scheme TexasWater
-          -sdk iphonesimulator -destination 'generic/platform=iOS Simulator'
-          CODE_SIGNING_ALLOWED=NO build
+          -sdk iphonesimulator -destination 'platform=iOS Simulator,name=iPhone 16,OS=latest'
+          CODE_SIGNING_ALLOWED=NO test

@@ -18,17 +18,27 @@ final class ReservoirDataStore: ObservableObject {
     @Published private(set) var isRefreshing = false
     @Published private(set) var errorMessage: String?
     @Published private(set) var favoriteIDs: Set<String>
+    @Published private(set) var dashboardRevision = 0
+    @Published private(set) var historyErrors: [String: String] = [:]
 
     private let twdbClient = TWDBClient()
     private let apiClient: TexasWaterAPIClient?
-    private let cache = DashboardCache()
+    private let cache: DashboardCache
     private let defaults: UserDefaults
     private let favoritesKey = SharedWaterData.favoritesKey
+    private let dashboardFetcher: (() async throws -> ReservoirDashboard)?
+    private let historyFetcher: ((ReservoirSummary) async throws -> [ReservoirObservation])?
+    private var historyRevisions: [String: Int] = [:]
 
-    init(defaults: UserDefaults? = nil) {
+    init(defaults: UserDefaults? = nil, cache: DashboardCache = DashboardCache(),
+         dashboardFetcher: (() async throws -> ReservoirDashboard)? = nil,
+         historyFetcher: ((ReservoirSummary) async throws -> [ReservoirObservation])? = nil) {
         self.defaults = defaults ?? SharedWaterData.defaults
         favoriteIDs = Set(self.defaults.stringArray(forKey: favoritesKey) ?? [])
         apiClient = AppEnvironment.backendURL.map(TexasWaterAPIClient.init(baseURL:))
+        self.dashboardFetcher = dashboardFetcher
+        self.historyFetcher = historyFetcher
+        self.cache = cache
     }
 
     var reservoirs: [ReservoirSummary] { dashboard?.reservoirs ?? [] }
@@ -83,7 +93,10 @@ final class ReservoirDataStore: ObservableObject {
 
         do {
             var fresh: ReservoirDashboard
-            if let apiClient {
+            if let dashboardFetcher {
+                fresh = try await dashboardFetcher()
+                source = .backend
+            } else if let apiClient {
                 do {
                     fresh = try await apiClient.fetchDashboard()
                     guard !fresh.reservoirs.isEmpty else {
@@ -99,6 +112,7 @@ final class ReservoirDataStore: ObservableObject {
                 source = .direct
             }
             dashboard = fresh
+            dashboardRevision += 1
             errorMessage = nil
             try? await cache.saveDashboard(fresh)
         } catch {
@@ -108,19 +122,23 @@ final class ReservoirDataStore: ObservableObject {
         }
     }
 
-    func loadHistory(for reservoir: ReservoirSummary) async {
-        guard historyByReservoirID[reservoir.id] == nil,
-              !loadingHistoryIDs.contains(reservoir.id) else { return }
+    func loadHistory(for reservoir: ReservoirSummary, force: Bool = false) async {
+        guard !loadingHistoryIDs.contains(reservoir.id),
+              force || historyRevisions[reservoir.id] != dashboardRevision else { return }
+        let requestedRevision = dashboardRevision
         loadingHistoryIDs.insert(reservoir.id)
         defer { loadingHistoryIDs.remove(reservoir.id) }
 
-        if let cached = try? await cache.loadHistory(reservoirID: reservoir.id) {
+        if historyByReservoirID[reservoir.id] == nil,
+           let cached = try? await cache.loadHistory(reservoirID: reservoir.id) {
             historyByReservoirID[reservoir.id] = cached
         }
 
         do {
             let history: [ReservoirObservation]
-            if let apiClient {
+            if let historyFetcher {
+                history = try await historyFetcher(reservoir)
+            } else if let apiClient {
                 do {
                     let backendHistory = try await apiClient.fetchHistory(reservoirID: reservoir.id)
                     history = coversOneYear(backendHistory)
@@ -133,11 +151,19 @@ final class ReservoirDataStore: ObservableObject {
                 history = try await twdbClient.fetchHistory(slug: reservoir.slug)
             }
             historyByReservoirID[reservoir.id] = history
+            historyRevisions[reservoir.id] = requestedRevision
+            historyErrors[reservoir.id] = nil
             try? await cache.saveHistory(history, reservoirID: reservoir.id)
         } catch {
-            if historyByReservoirID[reservoir.id] == nil {
-                errorMessage = "History for \(reservoir.shortName) is unavailable."
-            }
+            historyErrors[reservoir.id] = historyByReservoirID[reservoir.id]?.isEmpty == false
+                ? "Showing saved history because the latest refresh failed."
+                : "History for \(reservoir.shortName) is unavailable. Pull to refresh to retry."
+        }
+        // A dashboard refresh can finish while this request is in flight.
+        // Do not let that older request mark the newly refreshed history as current.
+        if requestedRevision != dashboardRevision {
+            loadingHistoryIDs.remove(reservoir.id)
+            await loadHistory(for: reservoir)
         }
     }
 
