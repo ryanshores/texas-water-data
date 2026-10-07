@@ -22,6 +22,7 @@
 		4EA3906A43D80CB9CA59192F /* TexasWaterDeepLinkInbox.swift in Sources */ = {isa = PBXBuildFile; fileRef = 302916A845075F563ADB3BF1 /* TexasWaterDeepLinkInbox.swift */; };
 		52EBEC298A77D78C36689341 /* Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = 7C0A38CDEDD7E7DE677DF778 /* Assets.xcassets */; };
 		5B9E2416BBA122334E64970C /* GroundwaterView.swift in Sources */ = {isa = PBXBuildFile; fileRef = D1B7B06CDF4B2A934BC1739E /* GroundwaterView.swift */; };
+		5D5C6B891E9E61C03B84748B /* Fixtures in Resources */ = {isa = PBXBuildFile; fileRef = 4C2DD9E5D82DC40B4C9BCC37 /* Fixtures */; };
 		5EEE9D215138E32A82058369 /* DashboardSection.swift in Sources */ = {isa = PBXBuildFile; fileRef = BB1C0D0E82A11223FDF1D3C6 /* DashboardSection.swift */; };
 		7198891B5BC1AF97295C5891 /* ReservoirDataStore.swift in Sources */ = {isa = PBXBuildFile; fileRef = 5CB01077DA0996E6B571F670 /* ReservoirDataStore.swift */; };
 		7AFFA2DCBFAF63C3B5A4ED38 /* TexasWaterDeepLink.swift in Sources */ = {isa = PBXBuildFile; fileRef = AEFA12EE73D6885B14618981 /* TexasWaterDeepLink.swift */; };
@@ -29,6 +30,7 @@
 		831DCA13C9378DB38FA8968E /* TexasWaterCoreTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = F2EAB49283762930FBEDEE70 /* TexasWaterCoreTests.swift */; };
 		85190710F3C50EAC2D273C8C /* ReservoirDetailView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 09EE94ED7175994401FA3B6E /* ReservoirDetailView.swift */; };
 		893BEFE5462E0C389887E9F8 /* GroundwaterDataStore.swift in Sources */ = {isa = PBXBuildFile; fileRef = 22CCFCCFE2F73F36A177CA42 /* GroundwaterDataStore.swift */; };
+		8D7AEF80F36152A69057C2D8 /* GroundwaterChartData.swift in Sources */ = {isa = PBXBuildFile; fileRef = 080792AE2F3CCCE3B5E1114B /* GroundwaterChartData.swift */; };
 		8ED9C717D029FA5A5AB01EBB /* TexasWaterCore in Frameworks */ = {isa = PBXBuildFile; productRef = ED3414E196B2423559F10374 /* TexasWaterCore */; };
 		94DD8C1568D445207F76A892 /* Texas Water Widget.appex in Embed Foundation Extensions */ = {isa = PBXBuildFile; fileRef = BB6F93893D2A3E57BC8314C5 /* Texas Water Widget.appex */; settings = {ATTRIBUTES = (RemoveHeadersOnCopy, ); }; };
 		969A6E800C1A83BD1FCBB8C0 /* DashboardCache.swift in Sources */ = {isa = PBXBuildFile; fileRef = A66BFA98AF8AB8620727E12D /* DashboardCache.swift */; };
@@ -82,6 +84,7 @@
 
 /* Begin PBXFileReference section */
 		002C534A2C8CCDA0B0A1CA6F /* ReservoirMapPanel.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ReservoirMapPanel.swift; sourceTree = "<group>"; };
+		080792AE2F3CCCE3B5E1114B /* GroundwaterChartData.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = GroundwaterChartData.swift; sourceTree = "<group>"; };
 		09EE94ED7175994401FA3B6E /* ReservoirDetailView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ReservoirDetailView.swift; sourceTree = "<group>"; };
 		1831155DCB25AB8ABA2F14D9 /* TexasWaterMap.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TexasWaterMap.swift; sourceTree = "<group>"; };
 		18CE220D7BF02E722A962CF8 /* DroughtMapView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DroughtMapView.swift; sourceTree = "<group>"; };
@@ -90,6 +93,7 @@
 		252335BE49976F8049BD4DC9 /* TexasWaterApp.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TexasWaterApp.swift; sourceTree = "<group>"; };
 		302916A845075F563ADB3BF1 /* TexasWaterDeepLinkInbox.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TexasWaterDeepLinkInbox.swift; sourceTree = "<group>"; };
 		3CCA109D9E69C1C94A05488E /* TexasWaterWidget.entitlements */ = {isa = PBXFileReference; lastKnownFileType = text.plist.entitlements; path = TexasWaterWidget.entitlements; sourceTree = "<group>"; };
+		4C2DD9E5D82DC40B4C9BCC37 /* Fixtures */ = {isa = PBXFileReference; lastKnownFileType = folder; name = Fixtures; path = Packages/TexasWaterCore/Tests/TexasWaterCoreTests/Fixtures; sourceTree = SOURCE_ROOT; };
 		53B0EBB49DA8A5E306922489 /* WaterFormatting.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = WaterFormatting.swift; sourceTree = "<group>"; };
 		542C45536EF3929417ECA424 /* LocalAlertManager.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = LocalAlertManager.swift; sourceTree = "<group>"; };
 		59DF126957AE0A444CF2CD7F /* TexasWaterAppTests.xctest */ = {isa = PBXFileReference; includeInIndex = 0; lastKnownFileType = wrapper.cfbundle; path = TexasWaterAppTests.xctest; sourceTree = BUILT_PRODUCTS_DIR; };
@@ -186,6 +190,7 @@
 		27F3F754D077CDFAF590F316 /* Groundwater */ = {
 			isa = PBXGroup;
 			children = (
+				080792AE2F3CCCE3B5E1114B /* GroundwaterChartData.swift */,
 				D1B7B06CDF4B2A934BC1739E /* GroundwaterView.swift */,
 			);
 			path = Groundwater;
@@ -217,6 +222,7 @@
 		593C3E1F05E747DA42412967 = {
 			isa = PBXGroup;
 			children = (
+				4C2DD9E5D82DC40B4C9BCC37 /* Fixtures */,
 				0B53FBBF849E72C291077AA9 /* Packages */,
 				949D26AAA1D4A3FEDDC1FA01 /* Shared */,
 				C07A108467DA14352DC4BDEC /* TexasWaterApp */,
@@ -423,6 +429,7 @@
 			buildConfigurationList = 1405B6C22D0F3199A8908BEA /* Build configuration list for PBXNativeTarget "TexasWaterCoreTests" */;
 			buildPhases = (
 				F610BF9B52D482BB48BCD5B8 /* Sources */,
+				72CA1C2A9A5E175E958B44F4 /* Resources */,
 				C278A0EE2BFEB372F3978C98 /* Frameworks */,
 			);
 			buildRules = (
@@ -482,6 +489,14 @@
 /* End PBXProject section */
 
 /* Begin PBXResourcesBuildPhase section */
+		72CA1C2A9A5E175E958B44F4 /* Resources */ = {
+			isa = PBXResourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				5D5C6B891E9E61C03B84748B /* Fixtures in Resources */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
 		B73ED1AAE11A4C9F0C02C5BC /* Resources */ = {
 			isa = PBXResourcesBuildPhase;
 			buildActionMask = 2147483647;
@@ -527,6 +542,7 @@
 				A3A45E3316D6C21923DB0B2E /* DroughtMapView.swift in Sources */,
 				0716C98545F68D9D618B7458 /* DroughtTodayCard.swift in Sources */,
 				EF1E6B86AC639AE365B45F43 /* DroughtView.swift in Sources */,
+				8D7AEF80F36152A69057C2D8 /* GroundwaterChartData.swift in Sources */,
 				893BEFE5462E0C389887E9F8 /* GroundwaterDataStore.swift in Sources */,
 				5B9E2416BBA122334E64970C /* GroundwaterView.swift in Sources */,
 				3AAF57D3FB9E364B02FB4925 /* LocalAlertManager.swift in Sources */,

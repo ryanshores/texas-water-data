@@ -37,7 +37,8 @@ struct ReservoirDetailView: View {
                 .accessibilityLabel(store.isFavorite(reservoir) ? "Remove favorite" : "Add favorite")
             }
         }
-        .task { await store.loadHistory(for: reservoir) }
+        .task(id: store.dashboardRevision) { await store.loadHistory(for: reservoir) }
+        .refreshable { await store.loadHistory(for: reservoir, force: true) }
     }
 
     private var map: some View {
@@ -93,6 +94,9 @@ struct ReservoirDetailView: View {
 
     private var historySection: some View {
         VStack(alignment: .leading, spacing: 12) {
+            if let error = store.historyErrors[reservoir.id] {
+                Text(error).font(.caption).foregroundStyle(.secondary)
+            }
             HStack {
                 Text("Percent full history").font(.headline)
                 Spacer()

@@ -76,8 +76,9 @@ targets:
       - path: Packages/TexasWaterCore/Tests/TexasWaterCoreTests
         excludes:
           - Fixtures
-    resources:
       - path: Packages/TexasWaterCore/Tests/TexasWaterCoreTests/Fixtures
+        type: folder
+        buildPhase: resources
     settings:
       base:
         GENERATE_INFOPLIST_FILE: YES

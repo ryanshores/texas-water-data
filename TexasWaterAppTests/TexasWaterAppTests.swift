@@ -1,9 +1,237 @@
 import XCTest
+import SwiftUI
 @testable import Texas_Water
 import TexasWaterCore
 
 @MainActor
 final class TexasWaterAppTests: XCTestCase {
+    func testMissingGroundwaterConfigurationShowsErrorsWithoutCrashing() async {
+        let directory = FileManager.default.temporaryDirectory.appending(path: "GroundwaterTests-\(UUID())")
+        defer { try? FileManager.default.removeItem(at: directory) }
+        let store = GroundwaterDataStore(cache: DashboardCache(directory: directory), baseURL: nil,
+            fetchDirectWells: { throw TexasWaterAPIError.invalidResponse },
+            fetchDirectHistory: { _ in throw TexasWaterAPIError.invalidResponse })
+        await store.load()
+        await store.loadHistory(wellID: "missing")
+        XCTAssertNotNil(store.errorMessage)
+        XCTAssertNotNil(store.historyErrors["missing"])
+        XCTAssertFalse(store.isLoading)
+        XCTAssertTrue(store.loadingHistoryIDs.isEmpty)
+    }
+
+    func testGroundwaterChartRendersVaryingDepths() throws {
+        let chart = GroundwaterChartData(readings: try readings("""
+        [{"date":"2026-10-01","depthBelowLandSurface":10},
+         {"date":"2026-10-05","depthBelowLandSurface":8}]
+        """))
+        let controller = UIHostingController(rootView: GroundwaterHistoryChart(data: chart))
+        controller.view.frame = CGRect(x: 0, y: 0, width: 390, height: 220)
+        controller.view.layoutIfNeeded()
+        let image = UIGraphicsImageRenderer(size: controller.view.bounds.size).image { context in
+            controller.view.layer.render(in: context.cgContext)
+        }
+        XCTAssertEqual(image.size.width, 390)
+    }
+    private func readings(_ json: String) throws -> [GroundwaterReading] {
+        try JSONDecoder().decode([GroundwaterReading].self, from: Data(json.utf8))
+    }
+
+    func testGroundwaterChartUsesTemporalDatesAndRisingOrdinate() throws {
+        let data = GroundwaterChartData(readings: try readings("""
+        [{"date":"2026-10-05","depthBelowLandSurface":8},
+         {"date":"2026-10-01","depthBelowLandSurface":10},
+         {"date":"invalid","depthBelowLandSurface":20}]
+        """))
+        XCTAssertEqual(data.points.count, 2)
+        XCTAssertEqual(data.points[1].date.timeIntervalSince(data.points[0].date), 4 * 86_400)
+        XCTAssertGreaterThan(data.points[1].ordinate, data.points[0].ordinate)
+        XCTAssertEqual(data.change, 2)
+        XCTAssertLessThan(data.domain.lowerBound, data.domain.upperBound)
+        XCTAssertTrue(data.points.allSatisfy { data.domain.contains($0.ordinate) })
+    }
+
+    func testGroundwaterChartPadsEmptyAndFlatSeries() throws {
+        for input in [[], try readings("""
+        [{"date":"2026-10-01","depthBelowLandSurface":10},
+         {"date":"2026-10-05","depthBelowLandSurface":10}]
+        """), try readings("""
+        [{"date":"2026-10-01","depthBelowLandSurface":10}]
+        """)] {
+            let chart = GroundwaterChartData(readings: input)
+            XCTAssertLessThan(chart.domain.lowerBound, chart.domain.upperBound)
+            XCTAssertTrue(chart.points.allSatisfy { chart.domain.contains($0.ordinate) })
+        }
+    }
+
+    func testGroundwaterCacheRecoveryAndExplicitRefresh() async throws {
+        let directory = FileManager.default.temporaryDirectory.appending(path: "GroundwaterTests-\(UUID())")
+        defer { try? FileManager.default.removeItem(at: directory) }
+        let cache = DashboardCache(directory: directory)
+        let wells = try JSONDecoder().decode([GroundwaterWell].self, from: Data("""
+        [{"id":"well-1","county":"Travis","aquifer":"Trinity","status":"active","latitude":30,"longitude":-98}]
+        """.utf8))
+        let history = try readings("""
+        [{"date":"2026-10-01","depthBelowLandSurface":10}]
+        """)
+        let refreshedHistory = try readings("""
+        [{"date":"2026-10-05","depthBelowLandSurface":8}]
+        """)
+        try await cache.saveGroundwaterWells(wells)
+        try await cache.saveGroundwaterHistory(history, wellID: "well-1")
+        var failing = true
+        var calls = 0
+        let store = GroundwaterDataStore(cache: cache, fetchWells: {
+            calls += 1
+            if failing { throw TexasWaterAPIError.invalidResponse }
+            return wells
+        }, fetchHistory: { _ in
+            if failing { throw TexasWaterAPIError.invalidResponse }
+            return refreshedHistory
+        }, fetchDirectWells: { throw TexasWaterAPIError.invalidResponse },
+           fetchDirectHistory: { _ in throw TexasWaterAPIError.invalidResponse })
+        await store.load()
+        await store.loadHistory(wellID: "well-1")
+        XCTAssertEqual(store.wells, wells)
+        XCTAssertEqual(store.histories["well-1"], history)
+        XCTAssertTrue(store.errorMessage?.contains("saved") == true)
+        XCTAssertTrue(store.historyErrors["well-1"]?.contains("saved") == true)
+        XCTAssertFalse(store.isLoading)
+        XCTAssertTrue(store.loadingHistoryIDs.isEmpty)
+        failing = false
+        await store.refresh()
+        await store.loadHistory(wellID: "well-1")
+        XCTAssertEqual(calls, 2)
+        XCTAssertNil(store.errorMessage)
+        XCTAssertNil(store.historyErrors["well-1"])
+        XCTAssertEqual(store.histories["well-1"], refreshedHistory)
+        let reloadedHistory = try await cache.loadGroundwaterHistory(wellID: "well-1")
+        XCTAssertEqual(reloadedHistory, refreshedHistory)
+    }
+
+    func testGroundwaterFailureWithoutCacheCanRetry() async {
+        let directory = FileManager.default.temporaryDirectory.appending(path: "GroundwaterTests-\(UUID())")
+        defer { try? FileManager.default.removeItem(at: directory) }
+        var failing = true
+        let store = GroundwaterDataStore(cache: DashboardCache(directory: directory), fetchWells: {
+            if failing { throw TexasWaterAPIError.invalidResponse }
+            return []
+        }, fetchHistory: { _ in throw TexasWaterAPIError.invalidResponse },
+           fetchDirectWells: { throw TexasWaterAPIError.invalidResponse },
+           fetchDirectHistory: { _ in throw TexasWaterAPIError.invalidResponse })
+        await store.load()
+        await store.loadHistory(wellID: "missing")
+        XCTAssertNotNil(store.errorMessage)
+        XCTAssertNotNil(store.historyErrors["missing"])
+        failing = false
+        await store.refresh()
+        XCTAssertNil(store.errorMessage)
+    }
+
+    func testGroundwaterFallsBackToDirectTWDBForCatalogAndHistory() async throws {
+        let directory = FileManager.default.temporaryDirectory.appending(path: "GroundwaterTests-\(UUID())")
+        defer { try? FileManager.default.removeItem(at: directory) }
+        let wells = try JSONDecoder().decode([GroundwaterWell].self, from: Data("""
+        [{"id":"well-2","county":"Travis","aquifer":"Trinity","status":"active","latitude":30,"longitude":-98}]
+        """.utf8))
+        let readings = try self.readings("""
+        [{"date":"2026-10-05","depthBelowLandSurface":8}]
+        """)
+        let store = GroundwaterDataStore(cache: DashboardCache(directory: directory),
+            fetchWells: { throw TexasWaterAPIError.unsuccessfulStatus(503) },
+            fetchHistory: { _ in throw TexasWaterAPIError.unsuccessfulStatus(503) },
+            fetchDirectWells: { wells }, fetchDirectHistory: { _ in readings })
+        await store.load()
+        await store.loadHistory(wellID: "well-2")
+        XCTAssertEqual(store.wells, wells)
+        XCTAssertEqual(store.histories["well-2"], readings)
+        XCTAssertNil(store.errorMessage)
+        XCTAssertNil(store.historyErrors["well-2"])
+    }
+
+    func testReservoirHistoryRefreshesAfterDashboardRefreshAndOnDemand() async throws {
+        let directory = FileManager.default.temporaryDirectory.appending(path: "ReservoirTests-\(UUID())")
+        defer { try? FileManager.default.removeItem(at: directory) }
+        let lake = reservoir(id: "test-\(UUID())")
+        let dashboard = ReservoirDashboard(generatedAt: "2026-10-06", sourceUpdatedAt: nil,
+                                          statewidePercentFull: 50, reservoirs: [lake])
+        var calls = 0
+        let store = ReservoirDataStore(cache: DashboardCache(directory: directory), dashboardFetcher: { dashboard }, historyFetcher: { _ in
+            calls += 1
+            return []
+        })
+        await store.refresh()
+        await store.loadHistory(for: lake)
+        await store.loadHistory(for: lake)
+        XCTAssertEqual(calls, 1)
+        await store.refresh()
+        await store.loadHistory(for: lake)
+        XCTAssertEqual(calls, 2)
+        await store.loadHistory(for: lake, force: true)
+        XCTAssertEqual(calls, 3)
+    }
+
+    func testReservoirFailedRefreshPreservesSavedHistoryAndRemainsRetryable() async throws {
+        let directory = FileManager.default.temporaryDirectory.appending(path: "ReservoirTests-\(UUID())")
+        defer { try? FileManager.default.removeItem(at: directory) }
+        let cache = DashboardCache(directory: directory)
+        let lake = reservoir(id: "cached-lake")
+        let observation = ReservoirObservation(date: Date(), waterLevel: 10, surfaceArea: nil,
+            reservoirStorage: nil, conservationStorage: nil, percentFull: 50,
+            conservationCapacity: nil, deadPoolCapacity: nil)
+        try await cache.saveHistory([observation], reservoirID: lake.id)
+        var failing = true
+        let store = ReservoirDataStore(cache: cache, historyFetcher: { _ in
+            if failing { throw TexasWaterAPIError.invalidResponse }
+            return [observation]
+        })
+        await store.loadHistory(for: lake)
+        XCTAssertEqual(store.historyByReservoirID[lake.id], [observation])
+        XCTAssertTrue(store.historyErrors[lake.id]?.contains("saved") == true)
+        XCTAssertTrue(store.loadingHistoryIDs.isEmpty)
+        failing = false
+        await store.loadHistory(for: lake)
+        XCTAssertNil(store.historyErrors[lake.id])
+    }
+
+    func testInFlightHistoryRetryUsesRefreshedReservoirSlug() async throws {
+        let directory = FileManager.default.temporaryDirectory.appending(path: "ReservoirTests-\(UUID())")
+        defer { try? FileManager.default.removeItem(at: directory) }
+        let oldLake = reservoir(id: "slug-change", slug: "heuristic-slug")
+        let currentLake = reservoir(id: "slug-change", slug: "official-slug")
+        let oldDashboard = ReservoirDashboard(generatedAt: "old", sourceUpdatedAt: nil,
+            statewidePercentFull: 50, reservoirs: [oldLake])
+        let freshDashboard = ReservoirDashboard(generatedAt: "new", sourceUpdatedAt: nil,
+            statewidePercentFull: 50, reservoirs: [currentLake])
+        var refreshCount = 0
+        var requestSlugs: [String] = []
+        var firstRequest: CheckedContinuation<[ReservoirObservation], Error>?
+        let firstRequestStarted = expectation(description: "first history request started")
+        let observation = ReservoirObservation(date: Date(), waterLevel: 10, surfaceArea: nil,
+            reservoirStorage: nil, conservationStorage: nil, percentFull: 50,
+            conservationCapacity: nil, deadPoolCapacity: nil)
+        let store = ReservoirDataStore(cache: DashboardCache(directory: directory), dashboardFetcher: {
+            refreshCount += 1
+            return refreshCount == 1 ? oldDashboard : freshDashboard
+        }, historyFetcher: { lake in
+            requestSlugs.append(lake.slug)
+            if requestSlugs.count == 1 {
+                firstRequestStarted.fulfill()
+                return try await withCheckedThrowingContinuation { firstRequest = $0 }
+            }
+            return [observation]
+        })
+
+        await store.refresh()
+        let historyTask = Task { await store.loadHistory(for: oldLake) }
+        await fulfillment(of: [firstRequestStarted], timeout: 2)
+        await store.refresh()
+        firstRequest?.resume(returning: [observation])
+        await historyTask.value
+
+        XCTAssertEqual(requestSlugs, ["heuristic-slug", "official-slug"])
+        XCTAssertEqual(store.historyByReservoirID[oldLake.id], [observation])
+    }
+
     func testWaterFormattingUsesClearFallbacksAndUnits() {
         XCTAssertEqual(WaterFormatting.percent(42.26), "42.3%")
         XCTAssertEqual(WaterFormatting.percent(nil), "Not available")
@@ -49,10 +277,10 @@ final class TexasWaterAppTests: XCTestCase {
         XCTAssertTrue(FileManager.default.fileExists(atPath: directory.appending(path: "history-lake-travis.json").path()))
     }
 
-    private func reservoir(id: String) -> ReservoirSummary {
+    private func reservoir(id: String, slug: String = "travis") -> ReservoirSummary {
         ReservoirSummary(
             id: id,
-            slug: "travis",
+            slug: slug,
             shortName: "Travis",
             fullName: "Lake Travis",
             observedAt: "2026-10-05T00:00:00Z",

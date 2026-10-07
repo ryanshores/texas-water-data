@@ -14,10 +14,17 @@ struct GroundwaterView: View {
             Group {
                 if store.isLoading && store.wells.isEmpty { ProgressView("Loading monitoring wells…") }
                 else if let error = store.errorMessage, store.wells.isEmpty { ContentUnavailableView("Groundwater unavailable", systemImage: "drop.triangle", description: Text(error)) }
-                else { List { controls; wells } }
+                else { List {
+                    if let error = store.errorMessage { Section { Text(error).foregroundStyle(.secondary) } }
+                    controls; wells
+                }.refreshable { await store.refresh() } }
             }
             .navigationTitle("Groundwater")
             .task { await store.load() }
+            .toolbar {
+                Button("Refresh", systemImage: "arrow.clockwise") { Task { await store.refresh() } }
+                    .disabled(store.isLoading)
+            }
             .sheet(item: $selectedWell) { GroundwaterDetailView(well: $0) }
         }
     }
@@ -46,34 +53,78 @@ struct GroundwaterView: View {
 
 private struct GroundwaterDetailView: View {
     let well: GroundwaterWell
-    @State private var readings: [GroundwaterReading] = []
-    @State private var error: String?
+    @EnvironmentObject private var store: GroundwaterDataStore
+    private var chart: GroundwaterChartData { GroundwaterChartData(readings: store.histories[well.id] ?? []) }
     var body: some View {
         NavigationStack {
             List {
                 Section { Text(well.aquifer); Text("\(well.county) County") }
-                if let change = GroundwaterTrend.waterTableChange(readings: readings) {
+                if let change = chart.change {
                     Section("Water-table change") {
                         Text(change >= 0 ? "Rose \(change, specifier: "%.1f") ft" : "Fell \(-change, specifier: "%.1f") ft")
                         Text("A smaller depth below land surface means the water table rose.").font(.caption).foregroundStyle(.secondary)
+                        if let first = chart.points.first, let last = chart.points.last {
+                            Text("\(groundwaterDateLabel(first.date)) – \(groundwaterDateLabel(last.date))").font(.caption)
+                        }
                     }
                 }
-                if !readings.isEmpty {
+                if !chart.points.isEmpty {
                     Section("History") {
-                        Chart(readings) { LineMark(x: .value("Date", $0.date), y: .value("Depth below land surface", $0.depthBelowLandSurface)) }
-                            .chartYScale(domain: (readings.map(\.depthBelowLandSurface).max() ?? 1)...(readings.map(\.depthBelowLandSurface).min() ?? 0))
+                        GroundwaterHistoryChart(data: chart)
                             .frame(height: 180)
                     }
                 }
-                if let error { Text(error).foregroundStyle(.secondary) }
+                if store.loadingHistoryIDs.contains(well.id) { ProgressView("Loading history…") }
+                if let error = store.historyErrors[well.id] { Text(error).foregroundStyle(.secondary) }
+                if !store.loadingHistoryIDs.contains(well.id), chart.points.isEmpty, store.historyErrors[well.id] == nil {
+                    Text("No valid history observations are available.").foregroundStyle(.secondary)
+                }
             }
             .navigationTitle(well.id)
-            .task {
-                do { readings = try await TexasWaterAPIClient(baseURL: AppEnvironment.backendURL!).fetchGroundwaterHistory(wellID: well.id) }
-                catch { self.error = error.localizedDescription }
+            .task { await store.loadHistory(wellID: well.id) }
+            .refreshable { await store.loadHistory(wellID: well.id) }
+            .toolbar {
+                Button("Refresh", systemImage: "arrow.clockwise") { Task { await store.loadHistory(wellID: well.id) } }
+                    .disabled(store.loadingHistoryIDs.contains(well.id))
             }
         }
     }
+}
+
+struct GroundwaterHistoryChart: View {
+    let data: GroundwaterChartData
+
+    var body: some View {
+        Chart(data.points) {
+            LineMark(x: .value("Date", $0.date), y: .value("Depth below land surface", $0.ordinate))
+            PointMark(x: .value("Date", $0.date), y: .value("Depth below land surface", $0.ordinate))
+        }
+        .chartYScale(domain: data.domain)
+        .chartXAxis {
+            AxisMarks { value in
+                AxisGridLine()
+                AxisTick()
+                AxisValueLabel {
+                    if let date = value.as(Date.self) { Text(groundwaterDateLabel(date)) }
+                }
+            }
+        }
+        .chartYAxis {
+            AxisMarks { value in
+                AxisGridLine()
+                AxisTick()
+                AxisValueLabel {
+                    if let depth = value.as(Double.self) { Text("\(-depth, specifier: "%.1f")") }
+                }
+            }
+        }
+        .chartYAxisLabel("Depth below land surface (ft)")
+    }
+
+}
+
+private func groundwaterDateLabel(_ date: Date) -> String {
+    date.formatted(Date.FormatStyle(date: .abbreviated, time: .omitted, timeZone: .gmt))
 }
 
 private extension Array where Element: Hashable { var unique: [Element] { Array(Set(self)) } }

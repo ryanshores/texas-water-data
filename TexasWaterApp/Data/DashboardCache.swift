@@ -36,6 +36,24 @@ actor DashboardCache {
 
     private var dashboardURL: URL { directory.appending(path: "dashboard.json") }
 
+    func loadGroundwaterWells() throws -> [GroundwaterWell] {
+        try decoder.decode([GroundwaterWell].self, from: Data(contentsOf: directory.appending(path: "groundwater-wells.json")))
+    }
+
+    func saveGroundwaterWells(_ wells: [GroundwaterWell]) throws {
+        try prepareDirectory()
+        try encoder.encode(wells).write(to: directory.appending(path: "groundwater-wells.json"), options: .atomic)
+    }
+
+    func loadGroundwaterHistory(wellID: String) throws -> [GroundwaterReading] {
+        try decoder.decode([GroundwaterReading].self, from: Data(contentsOf: historyURL(reservoirID: "groundwater-" + wellID)))
+    }
+
+    func saveGroundwaterHistory(_ readings: [GroundwaterReading], wellID: String) throws {
+        try prepareDirectory()
+        try encoder.encode(readings).write(to: historyURL(reservoirID: "groundwater-" + wellID), options: .atomic)
+    }
+
     private func historyURL(reservoirID: String) -> URL {
         let safeID = reservoirID.replacingOccurrences(
             of: "[^A-Za-z0-9_-]",
