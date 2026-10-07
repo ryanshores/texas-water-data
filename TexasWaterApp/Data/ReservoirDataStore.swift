@@ -122,7 +122,10 @@ final class ReservoirDataStore: ObservableObject {
         }
     }
 
-    func loadHistory(for reservoir: ReservoirSummary, force: Bool = false) async {
+    func loadHistory(for requestedReservoir: ReservoirSummary, force: Bool = false) async {
+        // Detail views can outlive the dashboard snapshot that created them.
+        // Always use the current record (including its official history slug).
+        let reservoir = reservoirs.first(where: { $0.id == requestedReservoir.id }) ?? requestedReservoir
         guard !loadingHistoryIDs.contains(reservoir.id),
               force || historyRevisions[reservoir.id] != dashboardRevision else { return }
         let requestedRevision = dashboardRevision
@@ -163,7 +166,8 @@ final class ReservoirDataStore: ObservableObject {
         // Do not let that older request mark the newly refreshed history as current.
         if requestedRevision != dashboardRevision {
             loadingHistoryIDs.remove(reservoir.id)
-            await loadHistory(for: reservoir)
+            let currentReservoir = reservoirs.first(where: { $0.id == reservoir.id }) ?? reservoir
+            await loadHistory(for: currentReservoir)
         }
     }
 

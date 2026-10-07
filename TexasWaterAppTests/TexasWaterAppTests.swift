@@ -193,6 +193,45 @@ final class TexasWaterAppTests: XCTestCase {
         XCTAssertNil(store.historyErrors[lake.id])
     }
 
+    func testInFlightHistoryRetryUsesRefreshedReservoirSlug() async throws {
+        let directory = FileManager.default.temporaryDirectory.appending(path: "ReservoirTests-\(UUID())")
+        defer { try? FileManager.default.removeItem(at: directory) }
+        let oldLake = reservoir(id: "slug-change", slug: "heuristic-slug")
+        let currentLake = reservoir(id: "slug-change", slug: "official-slug")
+        let oldDashboard = ReservoirDashboard(generatedAt: "old", sourceUpdatedAt: nil,
+            statewidePercentFull: 50, reservoirs: [oldLake])
+        let freshDashboard = ReservoirDashboard(generatedAt: "new", sourceUpdatedAt: nil,
+            statewidePercentFull: 50, reservoirs: [currentLake])
+        var refreshCount = 0
+        var requestSlugs: [String] = []
+        var firstRequest: CheckedContinuation<[ReservoirObservation], Error>?
+        let firstRequestStarted = expectation(description: "first history request started")
+        let observation = ReservoirObservation(date: Date(), waterLevel: 10, surfaceArea: nil,
+            reservoirStorage: nil, conservationStorage: nil, percentFull: 50,
+            conservationCapacity: nil, deadPoolCapacity: nil)
+        let store = ReservoirDataStore(cache: DashboardCache(directory: directory), dashboardFetcher: {
+            refreshCount += 1
+            return refreshCount == 1 ? oldDashboard : freshDashboard
+        }, historyFetcher: { lake in
+            requestSlugs.append(lake.slug)
+            if requestSlugs.count == 1 {
+                firstRequestStarted.fulfill()
+                return try await withCheckedThrowingContinuation { firstRequest = $0 }
+            }
+            return [observation]
+        })
+
+        await store.refresh()
+        let historyTask = Task { await store.loadHistory(for: oldLake) }
+        await fulfillment(of: [firstRequestStarted], timeout: 2)
+        await store.refresh()
+        firstRequest?.resume(returning: [observation])
+        await historyTask.value
+
+        XCTAssertEqual(requestSlugs, ["heuristic-slug", "official-slug"])
+        XCTAssertEqual(store.historyByReservoirID[oldLake.id], [observation])
+    }
+
     func testWaterFormattingUsesClearFallbacksAndUnits() {
         XCTAssertEqual(WaterFormatting.percent(42.26), "42.3%")
         XCTAssertEqual(WaterFormatting.percent(nil), "Not available")
@@ -238,10 +277,10 @@ final class TexasWaterAppTests: XCTestCase {
         XCTAssertTrue(FileManager.default.fileExists(atPath: directory.appending(path: "history-lake-travis.json").path()))
     }
 
-    private func reservoir(id: String) -> ReservoirSummary {
+    private func reservoir(id: String, slug: String = "travis") -> ReservoirSummary {
         ReservoirSummary(
             id: id,
-            slug: "travis",
+            slug: slug,
             shortName: "Travis",
             fullName: "Lake Travis",
             observedAt: "2026-10-05T00:00:00Z",
